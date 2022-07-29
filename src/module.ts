@@ -5,36 +5,20 @@ import { Panel } from './Panel';
 export const plugin = new PanelPlugin<Options>(Panel).setPanelOptions(builder => {
   return builder
     .addTextInput({
-      path: 'text',
-      name: 'Simple text option',
-      description: 'Description of panel option',
-      defaultValue: 'Default value of text input option',
-    })
-    .addBooleanSwitch({
-      path: 'showSeriesCount',
-      name: 'Show series counter',
-      defaultValue: false,
-    })
-    .addRadio({
-      path: 'seriesCountSize',
-      defaultValue: 'sm',
-      name: 'Series counter size',
+      path: 'endpoint',
+      name: 'Anomalizer Endpoint',
+      description: 'The endpoint of your Anomalizer endpoint to pull metrics from',
+      defaultValue: 'https://engine.anomalizer.app',
+    }).addRadio({
+      name: 'Metric Type',
+      description: 'The type of Metric to be displayed',
+      path: 'metricType',
       settings: {
         options: [
-          {
-            value: 'sm',
-            label: 'Small',
-          },
-          {
-            value: 'md',
-            label: 'Medium',
-          },
-          {
-            value: 'lg',
-            label: 'Large',
-          },
+          { value: 'timeseries', label: 'Time Series' },
+          { value: 'scatter', label: 'Scatter' },
         ],
       },
-      showIf: () => true,
-    });
+      defaultValue: 'timeseries',
+    })
 });

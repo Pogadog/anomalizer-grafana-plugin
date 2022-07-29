@@ -1,7 +1,8 @@
 type SeriesSize = 'sm' | 'md' | 'lg';
 
 export interface Options {
-  text: string;
+  endpoint: string;
   showSeriesCount: boolean;
   seriesCountSize: SeriesSize;
+  metricType: string;
 }
