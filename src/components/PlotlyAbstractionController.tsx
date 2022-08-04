@@ -31,7 +31,7 @@ export default class PlotlyAbstractionController extends Component<Props, State>
     }
 
     componentDidUpdate = () => {
-        
+        this.renderPlot();
     }
 
     render = () => {

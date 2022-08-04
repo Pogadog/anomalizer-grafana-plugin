@@ -7,6 +7,96 @@ import Clock from './Clock';
 import Theme from 'values/Theme';
 import PlotlyAbstractionController from './PlotlyAbstractionController';
 
+interface MetricImage {
+    cardinality: string
+    features: {
+        [key: string]: number | string
+    }
+    id: string
+    img: string
+    metric: string
+    plot: "timeseries" | "scatter"
+    prometheus: string
+    stats: {
+        [key: string]: number
+    }
+    status: "normal" | "warning" | "critical"
+    tags: [{
+        [key: string]: string
+    }]
+    type: string
+}
+
+interface MetricFigure {
+    data: [
+        {
+            hovertemplate: string,
+            legendgroup: string,
+            line: {
+                color: string,
+                dash: string
+            },
+            marker: {
+                symbol: string
+            },
+            mode: string,
+            name: string,
+            orientation: string,
+            showlegend: boolean,
+            type: string,
+            x: [number],
+            xaxis: "x",
+            y: [number],
+            yaxis: "y"
+        }
+    ],
+    layout: {
+        paper_bgcolor: string
+        plot_bgcolor: string
+        autosize: boolean,
+        font: {
+            size?: number,
+            color?: string
+        },
+        height: number,
+        legend: {
+            title: {
+                text: string
+            },
+            tracegroupgap: 0
+        },
+        showlegend: boolean,
+        template: object,
+        title: {
+            text: string,
+            x: number,
+            xanchor: string,
+            font: {
+                color: string
+            }
+        },
+        width: number,
+        xaxis: {
+            anchor: "x" | "y",
+            domain: [number],
+            showgrid: boolean,
+            title: {
+                text: string
+            }
+        },
+        yaxis: {
+            anchor: "x" | "y",
+            domain: [number],
+            showgrid: boolean,
+            title: {
+                text: string
+            }
+        }
+    }
+}
+
+type MetricFigureLayout = MetricFigure["layout"];
+
 interface Props extends PanelProps<Options> {};
 interface State {
     showModal: boolean,
@@ -14,7 +104,8 @@ interface State {
     images: any,
     hover: string,
     showMetric: string | null,
-    showMetricData: Object | null
+    showMetricImage: MetricImage | null
+    showMetricFigure: MetricFigure | null
 }
 export default class Main extends Component<Props, State> {
 
@@ -31,7 +122,8 @@ export default class Main extends Component<Props, State> {
             images: {},
             hover: '',
             showMetric: null,
-            showMetricData: null
+            showMetricImage: null,
+            showMetricFigure: null
         }
         this.clock = new Clock();
         this.clockKeys = {
@@ -59,14 +151,34 @@ export default class Main extends Component<Props, State> {
         this.setState(update(this.state, { showModal: {$set: false} }));
     }
 
+    updateShowMetricFigure = async () => {
+        let r = await fetch(this.props.options.endpoint + '/figure/' + this.state.showMetric);
+        let figure = await r.json();
+
+        figure.layout = this.reshadeMetricLayout(figure.layout);
+
+        this.setState(update(this.state, { showMetricFigure: {$set: figure} }))
+    }
+
     showMetric = () => {
-        this.setState(update(this.state, { showMetric: {$set: this.state.hover} }), () => {
-            
+        this.setState(update(this.state, { showMetric: {$set: this.state.hover}, showMetricImage: {$set: this.state.images[this.state.hover]} }), async () => {
+            await this.updateShowMetricFigure();
+            this.clock.addTask('showMetricFigureUpdate', this.updateShowMetricFigure, 10000);
         });
     }
 
     hideMetric = () => {
-        this.setState(update(this.state, { showMetric: {$set: null} }));
+        this.clock.removeTask('showMetricFigureUpdate');
+        this.setState(update(this.state, { showMetric: {$set: null}, showMetricImage: {$set: null}, showMetricFigure: {$set: null} }));
+    }
+
+    reshadeMetricLayout = (layout: MetricFigureLayout): MetricFigureLayout => {
+
+        layout.paper_bgcolor = "#222222"
+        layout.plot_bgcolor = "#222222"
+        if (!layout.font) layout.font = {}
+        layout.font.color = "white"
+        return layout;
     }
 
     reshadeMetricImage = (img: string): string => {
@@ -158,7 +270,14 @@ export default class Main extends Component<Props, State> {
                 return <div style={{ overflow: 'scroll', width: "100%", height: "100%" }} >
 
                     <GrafanaUI.Modal isOpen={this.state.showMetric !== null} title="Metric Details" onDismiss={this.hideMetric} >
-
+                        <div style={{ display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center', width: "100%" }} >
+                            {!this.state.showMetricFigure && <img src={this.state.showMetricImage?.img} style={{ width: 400, height: 400, borderRadius: 10, opacity: 0.2 }} />}
+                            {!this.state.showMetricFigure && <div style={{ position: 'absolute' }} >
+                                <GrafanaUI.LoadingPlaceholder  />
+                            </div>}
+                            {this.state.showMetricFigure && <div style={{ borderRadius: 10 }} ><PlotlyAbstractionController data={this.state.showMetricFigure.data} layout={this.state.showMetricFigure.layout} style={{ width: 400, height: 400, borderRadius: 10 }} /></div>}
+                            
+                        </div>
                     </GrafanaUI.Modal>
 
 
