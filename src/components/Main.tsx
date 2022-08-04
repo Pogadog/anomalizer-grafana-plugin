@@ -5,7 +5,7 @@ import * as GrafanaUI from '@grafana/ui';
 import update from 'immutability-helper';
 import Clock from './Clock';
 import Theme from 'values/Theme';
-const Plotly = require("../plotly/plotly.min.js");
+import PlotlyAbstractionController from './PlotlyAbstractionController';
 
 interface Props extends PanelProps<Options> {};
 interface State {
@@ -59,17 +59,9 @@ export default class Main extends Component<Props, State> {
         this.setState(update(this.state, { showModal: {$set: false} }));
     }
 
-    getPlotlyContainerId = () => {
-        return "plotly-render-" + this.state.showMetric;
-    }
-
     showMetric = () => {
         this.setState(update(this.state, { showMetric: {$set: this.state.hover} }), () => {
-            let plot = document.getElementById(this.getPlotlyContainerId());
-            Plotly.newPlot( plot, [{
-            x: [1, 2, 3, 4, 5],
-            y: [1, 2, 4, 8, 16] }], {
-            margin: { t: 0 } } );
+            
         });
     }
 
@@ -88,7 +80,7 @@ export default class Main extends Component<Props, State> {
                 return <div style={{ overflow: 'scroll', width: "100%", height: "100%" }} >
 
                     <GrafanaUI.Modal isOpen={this.state.showMetric !== null} title="Metric Details" onDismiss={this.hideMetric} >
-                        <div id={this.getPlotlyContainerId()} style={{width: 600, height: 250}}></div>
+                        
                     </GrafanaUI.Modal>
 
 
