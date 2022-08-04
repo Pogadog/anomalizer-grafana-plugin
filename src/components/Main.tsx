@@ -13,7 +13,8 @@ interface State {
     ready: boolean,
     images: any,
     hover: string,
-    showMetric: string | null
+    showMetric: string | null,
+    showMetricData: Object | null
 }
 export default class Main extends Component<Props, State> {
 
@@ -29,7 +30,8 @@ export default class Main extends Component<Props, State> {
             ready: false,
             images: {},
             hover: '',
-            showMetric: null
+            showMetric: null,
+            showMetricData: null
         }
         this.clock = new Clock();
         this.clockKeys = {
@@ -89,6 +91,8 @@ export default class Main extends Component<Props, State> {
                         <div id={this.getPlotlyContainerId()} style={{width: 600, height: 250}}></div>
                     </GrafanaUI.Modal>
 
+
+
                     {Object.keys(this.state.images).map((id, i) => {
                         
                         let metric = this.state.images[id];
@@ -99,7 +103,6 @@ export default class Main extends Component<Props, State> {
 
                         let background = "#222222";
 
-                        console.log(x)
 
                         if (x.getElementsByTagName("rect")[0]) {
                             // set background color of whole metric
@@ -108,12 +111,12 @@ export default class Main extends Component<Props, State> {
 
                         if (x.getElementsByClassName("xzl zl crisp")[0]) {
                             // set background color of x boundary line
-                            x.getElementsByClassName("xzl zl crisp")[0].style.stroke = "white";
+                            (x.getElementsByClassName("xzl zl crisp") as HTMLCollectionOf<HTMLElement>)[0].style.stroke = "white";
                         }
 
                         if (x.getElementsByClassName("yzl zl crisp")[0]) {
                             // set background color of y boundary line
-                            x.getElementsByClassName("yzl zl crisp")[0].style.stroke = "white";
+                            (x.getElementsByClassName("yzl zl crisp") as HTMLCollectionOf<HTMLElement>)[0].style.stroke = "white";
                         }
 
                         for (let i=0; i<x.getElementsByClassName("xtick").length; i++) {
@@ -138,36 +141,36 @@ export default class Main extends Component<Props, State> {
 
                         if (x.getElementsByClassName("gtitle")[0]) {
                             // set color of title text
-                            x.getElementsByClassName("gtitle")[0].style.fill = "white";
+                            (x.getElementsByClassName("gtitle") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
                         }
 
                         if (x.getElementsByClassName("bg")[0]) {
                             // set background color of legend
-                            x.getElementsByClassName("bg")[0].style.fill = background;
+                            (x.getElementsByClassName("bg") as HTMLCollectionOf<HTMLElement>)[0].style.fill = background;
                         }
 
                         for (let i=0; i<x.getElementsByClassName("legendtext").length; i++) {
                             // set color of line legend text(s)
                             if (x.getElementsByClassName("legendtext")[i]) {
 
-                                x.getElementsByClassName("legendtext")[i].style.fill = "white"
+                                (x.getElementsByClassName("legendtext") as HTMLCollectionOf<HTMLElement>)[i].style.fill = "white"
                             }
                         }
 
                         if (x.getElementsByClassName("legendtitletext")[0]) {
                             // set color of legend title text
-                            x.getElementsByClassName("legendtitletext")[0].style.fill = "white";
+                            (x.getElementsByClassName("legendtitletext") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
                         }
 
 
                         if (x.getElementsByClassName("xtitle")[0]) {
                             // set color of x axis label
-                            x.getElementsByClassName("xtitle")[0].style.fill = "white";
+                            (x.getElementsByClassName("xtitle") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
                         }
 
                         if (x.getElementsByClassName("ytitle")[0]) {
                             // set color of y axis label
-                            x.getElementsByClassName("ytitle")[0].style.fill = "white";
+                            (x.getElementsByClassName("ytitle") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
                         }
 
                         metric.img = "data:image/svg+xml," + encodeURIComponent(new XMLSerializer().serializeToString(x))
