@@ -69,6 +69,84 @@ export default class Main extends Component<Props, State> {
         this.setState(update(this.state, { showMetric: {$set: null} }));
     }
 
+    reshadeMetricImage = (img: string): string => {
+        let p = new DOMParser();
+        let x = p.parseFromString(decodeURIComponent(img.split(",", 2)[1]), "image/svg+xml");
+
+        let background = "#222222";
+
+        if (x.getElementsByTagName("rect")[0]) {
+            // set background color of whole metric
+            x.getElementsByTagName("rect")[0].style.fill = background;
+        }
+
+        if (x.getElementsByClassName("xzl zl crisp")[0]) {
+            // set background color of x boundary line
+            (x.getElementsByClassName("xzl zl crisp") as HTMLCollectionOf<HTMLElement>)[0].style.stroke = "white";
+        }
+
+        if (x.getElementsByClassName("yzl zl crisp")[0]) {
+            // set background color of y boundary line
+            (x.getElementsByClassName("yzl zl crisp") as HTMLCollectionOf<HTMLElement>)[0].style.stroke = "white";
+        }
+
+        for (let i=0; i<x.getElementsByClassName("xtick").length; i++) {
+            // set color of x axis ticks
+            if (x.getElementsByClassName("xtick")[i]) {
+
+                x.getElementsByClassName("xtick")[i].getElementsByTagName("text")[0].style.fill = "white"
+
+            }
+        
+        }
+
+        for (let i=0; i<x.getElementsByClassName("ytick").length; i++) {
+            // set color of y axis ticks
+            if (x.getElementsByClassName("ytick")[i]) {
+
+                x.getElementsByClassName("ytick")[i].getElementsByTagName("text")[0].style.fill = "white"
+
+            }
+        
+        }
+
+        if (x.getElementsByClassName("gtitle")[0]) {
+            // set color of title text
+            (x.getElementsByClassName("gtitle") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
+        }
+
+        if (x.getElementsByClassName("bg")[0]) {
+            // set background color of legend
+            (x.getElementsByClassName("bg") as HTMLCollectionOf<HTMLElement>)[0].style.fill = background;
+        }
+
+        for (let i=0; i<x.getElementsByClassName("legendtext").length; i++) {
+            // set color of line legend text(s)
+            if (x.getElementsByClassName("legendtext")[i]) {
+
+                (x.getElementsByClassName("legendtext") as HTMLCollectionOf<HTMLElement>)[i].style.fill = "white"
+            }
+        }
+
+        if (x.getElementsByClassName("legendtitletext")[0]) {
+            // set color of legend title text
+            (x.getElementsByClassName("legendtitletext") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
+        }
+
+
+        if (x.getElementsByClassName("xtitle")[0]) {
+            // set color of x axis label
+            (x.getElementsByClassName("xtitle") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
+        }
+
+        if (x.getElementsByClassName("ytitle")[0]) {
+            // set color of y axis label
+            (x.getElementsByClassName("ytitle") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
+        }
+
+        return "data:image/svg+xml," + encodeURIComponent(new XMLSerializer().serializeToString(x))
+    }
+
     render = () => {
 
         return <GrafanaUI.ThemeContext.Consumer>
@@ -80,7 +158,7 @@ export default class Main extends Component<Props, State> {
                 return <div style={{ overflow: 'scroll', width: "100%", height: "100%" }} >
 
                     <GrafanaUI.Modal isOpen={this.state.showMetric !== null} title="Metric Details" onDismiss={this.hideMetric} >
-                        
+
                     </GrafanaUI.Modal>
 
 
@@ -90,82 +168,7 @@ export default class Main extends Component<Props, State> {
                         let metric = this.state.images[id];
                         if (metric.plot !== this.props.options.metricType) return null;
 
-                        let p = new DOMParser();
-                        let x = p.parseFromString(decodeURIComponent(metric.img.split(",", 2)[1]), "image/svg+xml");
-
-                        let background = "#222222";
-
-
-                        if (x.getElementsByTagName("rect")[0]) {
-                            // set background color of whole metric
-                            x.getElementsByTagName("rect")[0].style.fill = background;
-                        }
-
-                        if (x.getElementsByClassName("xzl zl crisp")[0]) {
-                            // set background color of x boundary line
-                            (x.getElementsByClassName("xzl zl crisp") as HTMLCollectionOf<HTMLElement>)[0].style.stroke = "white";
-                        }
-
-                        if (x.getElementsByClassName("yzl zl crisp")[0]) {
-                            // set background color of y boundary line
-                            (x.getElementsByClassName("yzl zl crisp") as HTMLCollectionOf<HTMLElement>)[0].style.stroke = "white";
-                        }
-
-                        for (let i=0; i<x.getElementsByClassName("xtick").length; i++) {
-                            // set color of x axis ticks
-                            if (x.getElementsByClassName("xtick")[i]) {
-
-                                x.getElementsByClassName("xtick")[i].getElementsByTagName("text")[0].style.fill = "white"
-
-                            }
-                        
-                        }
-
-                        for (let i=0; i<x.getElementsByClassName("ytick").length; i++) {
-                            // set color of y axis ticks
-                            if (x.getElementsByClassName("ytick")[i]) {
-
-                                x.getElementsByClassName("ytick")[i].getElementsByTagName("text")[0].style.fill = "white"
-
-                            }
-                        
-                        }
-
-                        if (x.getElementsByClassName("gtitle")[0]) {
-                            // set color of title text
-                            (x.getElementsByClassName("gtitle") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
-                        }
-
-                        if (x.getElementsByClassName("bg")[0]) {
-                            // set background color of legend
-                            (x.getElementsByClassName("bg") as HTMLCollectionOf<HTMLElement>)[0].style.fill = background;
-                        }
-
-                        for (let i=0; i<x.getElementsByClassName("legendtext").length; i++) {
-                            // set color of line legend text(s)
-                            if (x.getElementsByClassName("legendtext")[i]) {
-
-                                (x.getElementsByClassName("legendtext") as HTMLCollectionOf<HTMLElement>)[i].style.fill = "white"
-                            }
-                        }
-
-                        if (x.getElementsByClassName("legendtitletext")[0]) {
-                            // set color of legend title text
-                            (x.getElementsByClassName("legendtitletext") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
-                        }
-
-
-                        if (x.getElementsByClassName("xtitle")[0]) {
-                            // set color of x axis label
-                            (x.getElementsByClassName("xtitle") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
-                        }
-
-                        if (x.getElementsByClassName("ytitle")[0]) {
-                            // set color of y axis label
-                            (x.getElementsByClassName("ytitle") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
-                        }
-
-                        metric.img = "data:image/svg+xml," + encodeURIComponent(new XMLSerializer().serializeToString(x))
+                        metric.img = this.reshadeMetricImage(metric.img);
         
                         let isHovered = this.state.hover === id;
         
