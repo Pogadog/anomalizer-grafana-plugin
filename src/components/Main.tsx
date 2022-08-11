@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import { PanelProps } from '@grafana/data';
+import { PanelProps, toDataFrame, FieldType } from '@grafana/data';
 import { Options } from 'types';
 import * as GrafanaUI from '@grafana/ui';
 import update from 'immutability-helper';
 import Clock from './Clock';
 import Theme from 'values/Theme';
 import PlotlyAbstractionController from './PlotlyAbstractionController';
+
+import '../styles/root.css';
 
 interface MetricImage {
     cardinality: string
@@ -105,7 +107,8 @@ interface State {
     hover: string,
     showMetric: string | null,
     showMetricImage: MetricImage | null
-    showMetricFigure: MetricFigure | null
+    showMetricFigure: MetricFigure | null,
+    loadingBarPinAlternate: boolean
 }
 export default class Main extends Component<Props, State> {
 
@@ -113,6 +116,8 @@ export default class Main extends Component<Props, State> {
     clockKeys: {
         [key: string]: string
     }
+
+    refreshInterval: number;
 
     constructor(props: Props) {
         super(props);
@@ -123,20 +128,29 @@ export default class Main extends Component<Props, State> {
             hover: '',
             showMetric: null,
             showMetricImage: null,
-            showMetricFigure: null
+            showMetricFigure: null,
+            loadingBarPinAlternate: false
         }
         this.clock = new Clock();
         this.clockKeys = {
             metricFetch: "metricFetch"
         }
+        this.refreshInterval = 15000;
     }
 
     componentDidMount = () => {
         this.clock.addTask(this.clockKeys.metricFetch, async () => {
             let r = await fetch(this.props.options.endpoint + '/images');
             r = await r.json();
-            this.setState(update(this.state, { ready: {$set: true}, images: {$set: r} }))
-        }, 10000);
+            this.setState(update(this.state, { ready: {$set: true}, images: {$set: r}}), () => {
+                setTimeout(() => {
+                    this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate } }));
+                }, 0);
+                
+            })
+        }, this.refreshInterval);
+        //this.setState(update(this.state, { loadingBarStateAttr: {$set: 'collapsed'} }));
+
     }
 
     componentWillUnmount = () => {
@@ -267,16 +281,29 @@ export default class Main extends Component<Props, State> {
                     <GrafanaUI.LoadingPlaceholder text={`Loading metrics from ${this.props.options.endpoint}`} />
                 </div>
         
-                return <div style={{ overflow: 'scroll', width: "100%", height: "100%" }} >
+                return <div style={{ overflow: 'scroll', width: "100%", height: "100%" }}>
+                    
+                    <div style={{ height: 2, backgroundColor: this.state.loadingBarPinAlternate ? Theme.colors.palette.primary : Theme.colors.palette.secondary, marginLeft: this.state.loadingBarPinAlternate ? undefined : 'auto', marginRight: this.state.loadingBarPinAlternate ? undefined : 0 }} className="loading-bar" data-state={this.state.loadingBarPinAlternate ? "collapsed" : null} data-refresh-interval={this.refreshInterval} />
 
                     <GrafanaUI.Modal isOpen={this.state.showMetric !== null} title="Metric Details" onDismiss={this.hideMetric} >
-                        <div style={{ display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center', width: "100%" }} >
+                        <div style={{ display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: "100%" }} >
                             {!this.state.showMetricFigure && <img src={this.state.showMetricImage?.img} style={{ width: 400, height: 400, borderRadius: 10, opacity: 0.2 }} />}
                             {!this.state.showMetricFigure && <div style={{ position: 'absolute' }} >
                                 <GrafanaUI.LoadingPlaceholder  />
                             </div>}
                             {this.state.showMetricFigure && <div style={{ borderRadius: 10 }} ><PlotlyAbstractionController data={this.state.showMetricFigure.data} layout={this.state.showMetricFigure.layout} style={{ width: 400, height: 400, borderRadius: 10 }} /></div>}
-                            
+                            <div style={{ alignSelf: 'flex-start' }} >
+                                <p style={{ fontSize: 24}} >Metric</p>
+                                <p style={{ marginLeft: 20 }} >{this.state.showMetricImage?.metric}</p>
+                                <p style={{ fontSize: 24}} >Tags</p>
+                                <GrafanaUI.Table width={200} height={200} data={toDataFrame({
+                                    name: 'foo bar',
+                                    fields: [
+                                        { name: 'Tag', type: FieldType.string, values: ["one", "two"] },
+                                        { name: 'Value', type: FieldType.number, values: [1, 2] },
+                                    ],
+                                })} />
+                            </div>
                         </div>
                     </GrafanaUI.Modal>
 

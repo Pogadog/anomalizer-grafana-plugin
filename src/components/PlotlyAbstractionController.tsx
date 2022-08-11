@@ -23,7 +23,7 @@ export default class PlotlyAbstractionController extends Component<Props, State>
 
     renderPlot = () => {
         let plot = document.getElementById(this.id);
-        Plotly.newPlot( plot, this.props.data, this.props.layout );
+        Plotly.newPlot( plot, this.props.data, this.props.layout, { displaylogo: false } );
     }
 
     componentDidMount = () => {
