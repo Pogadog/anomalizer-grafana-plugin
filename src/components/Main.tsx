@@ -1,101 +1,16 @@
 import React, { Component } from 'react';
-import { PanelProps, toDataFrame, FieldType } from '@grafana/data';
+import { PanelProps } from '@grafana/data';
 import { Options } from 'types';
 import * as GrafanaUI from '@grafana/ui';
 import update from 'immutability-helper';
 import Clock from './Clock';
 import Theme from 'values/Theme';
-import PlotlyAbstractionController from './PlotlyAbstractionController';
+import MetricGridSquare from './MetricGridSquare';
+import MetricFigure from 'types/MetricFigure';
+import MetricImage from 'types/MetricImage';
 
 import '../styles/root.css';
-
-interface MetricImage {
-    cardinality: string
-    features: {
-        [key: string]: number | string
-    }
-    id: string
-    img: string
-    metric: string
-    plot: "timeseries" | "scatter"
-    prometheus: string
-    stats: {
-        [key: string]: number
-    }
-    status: "normal" | "warning" | "critical"
-    tags: [{
-        [key: string]: string
-    }]
-    type: string
-}
-
-interface MetricFigure {
-    data: [
-        {
-            hovertemplate: string,
-            legendgroup: string,
-            line: {
-                color: string,
-                dash: string
-            },
-            marker: {
-                symbol: string
-            },
-            mode: string,
-            name: string,
-            orientation: string,
-            showlegend: boolean,
-            type: string,
-            x: [number],
-            xaxis: "x",
-            y: [number],
-            yaxis: "y"
-        }
-    ],
-    layout: {
-        paper_bgcolor: string
-        plot_bgcolor: string
-        autosize: boolean,
-        font: {
-            size?: number,
-            color?: string
-        },
-        height: number,
-        legend: {
-            title: {
-                text: string
-            },
-            tracegroupgap: 0
-        },
-        showlegend: boolean,
-        template: object,
-        title: {
-            text: string,
-            x: number,
-            xanchor: string,
-            font: {
-                color: string
-            }
-        },
-        width: number,
-        xaxis: {
-            anchor: "x" | "y",
-            domain: [number],
-            showgrid: boolean,
-            title: {
-                text: string
-            }
-        },
-        yaxis: {
-            anchor: "x" | "y",
-            domain: [number],
-            showgrid: boolean,
-            title: {
-                text: string
-            }
-        }
-    }
-}
+import MetricModal from './MetricModal';
 
 type MetricFigureLayout = MetricFigure["layout"];
 
@@ -104,7 +19,7 @@ interface State {
     showModal: boolean,
     ready: boolean,
     images: any,
-    hover: string,
+    activeMetric: string,
     showMetric: string | null,
     showMetricImage: MetricImage | null
     showMetricFigure: MetricFigure | null,
@@ -125,7 +40,7 @@ export default class Main extends Component<Props, State> {
             showModal: false,
             ready: false,
             images: {},
-            hover: '',
+            activeMetric: '',
             showMetric: null,
             showMetricImage: null,
             showMetricFigure: null,
@@ -175,7 +90,7 @@ export default class Main extends Component<Props, State> {
     }
 
     showMetric = () => {
-        this.setState(update(this.state, { showMetric: {$set: this.state.hover}, showMetricImage: {$set: this.state.images[this.state.hover]} }), async () => {
+        this.setState(update(this.state, { showMetric: {$set: this.state.activeMetric}, showMetricImage: {$set: this.state.images[this.state.activeMetric]} }), async () => {
             await this.updateShowMetricFigure();
             this.clock.addTask('showMetricFigureUpdate', this.updateShowMetricFigure, 10000);
         });
@@ -283,31 +198,9 @@ export default class Main extends Component<Props, State> {
         
                 return <div style={{ overflow: 'scroll', width: "100%", height: "100%" }}>
                     
-                    <div style={{ height: 2, backgroundColor: this.state.loadingBarPinAlternate ? Theme.colors.palette.primary : Theme.colors.palette.secondary, marginLeft: this.state.loadingBarPinAlternate ? undefined : 'auto', marginRight: this.state.loadingBarPinAlternate ? undefined : 0 }} className="loading-bar" data-state={this.state.loadingBarPinAlternate ? "collapsed" : null} data-refresh-interval={this.refreshInterval} />
+                    <div style={{ height: 2, borderRadius: 90, backgroundColor: this.state.loadingBarPinAlternate ? Theme.colors.palette.secondary : Theme.colors.palette.primary, marginLeft: this.state.loadingBarPinAlternate ? undefined : 'auto', marginRight: this.state.loadingBarPinAlternate ? undefined : 0 }} className="loading-bar" data-state={this.state.loadingBarPinAlternate ? "collapsed" : null} data-refresh-interval={this.refreshInterval} />
 
-                    <GrafanaUI.Modal isOpen={this.state.showMetric !== null} title="Metric Details" onDismiss={this.hideMetric} >
-                        <div style={{ display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: "100%" }} >
-                            {!this.state.showMetricFigure && <img src={this.state.showMetricImage?.img} style={{ width: 400, height: 400, borderRadius: 10, opacity: 0.2 }} />}
-                            {!this.state.showMetricFigure && <div style={{ position: 'absolute' }} >
-                                <GrafanaUI.LoadingPlaceholder  />
-                            </div>}
-                            {this.state.showMetricFigure && <div style={{ borderRadius: 10 }} ><PlotlyAbstractionController data={this.state.showMetricFigure.data} layout={this.state.showMetricFigure.layout} style={{ width: 400, height: 400, borderRadius: 10 }} /></div>}
-                            <div style={{ alignSelf: 'flex-start' }} >
-                                <p style={{ fontSize: 24}} >Metric</p>
-                                <p style={{ marginLeft: 20 }} >{this.state.showMetricImage?.metric}</p>
-                                <p style={{ fontSize: 24}} >Tags</p>
-                                <GrafanaUI.Table width={200} height={200} data={toDataFrame({
-                                    name: 'foo bar',
-                                    fields: [
-                                        { name: 'Tag', type: FieldType.string, values: ["one", "two"] },
-                                        { name: 'Value', type: FieldType.number, values: [1, 2] },
-                                    ],
-                                })} />
-                            </div>
-                        </div>
-                    </GrafanaUI.Modal>
-
-
+                    <MetricModal isOpen={this.state.showMetric !== null} onDismiss={this.hideMetric} figure={this.state.showMetricFigure} image={this.state.showMetricImage} />
 
                     {Object.keys(this.state.images).map((id, i) => {
                         
@@ -315,21 +208,13 @@ export default class Main extends Component<Props, State> {
                         if (metric.plot !== this.props.options.metricType) return null;
 
                         metric.img = this.reshadeMetricImage(metric.img);
-        
-                        let isHovered = this.state.hover === id;
-        
-                        return <div style={{ display: 'inline-block', position: 'relative', width: 150, height: 150, margin: 5 }} onMouseEnter={() => {
-                            this.setState(update(this.state, { hover: {$set: id} }));
-                        }} onMouseLeave={() => {
-                            this.setState(update(this.state, { hover: {$set: ""} }));
-                        }} >
-                            <img src={metric.img} style={{ position: 'absolute', width: "100%", height: "100%", borderRadius: 10, zIndex: 1 }} />
-                            {isHovered && <div style={{ position: 'absolute', top: 0, bottom: 0, width: "100%", height: "100%", zIndex: 2, borderRadius: 10, alignItems: 'center' }} >
-                                <div style={{ position: 'absolute', bottom: 0, left: 0, marginLeft: 10, marginBottom: 5, backgroundColor: Theme.colors.palette.primary, borderRadius: 90, padding: 5, paddingLeft: 8, paddingRight: 8, cursor: 'pointer' }} onClick={this.showMetric} ><GrafanaUI.Icon name="eye" color="yellow" /></div>
-                                <div style={{ position: 'absolute', bottom: 0, right: 0, marginRight: 10, marginBottom: 5, backgroundColor: Theme.colors.palette.primary, borderRadius: 90, padding: 5, paddingLeft: 8, paddingRight: 8, cursor: 'pointer' }} ><GrafanaUI.Icon name="plus" /></div>
-        
-                            </div>}
-                        </div>;
+
+                        return <MetricGridSquare metric={metric} onClick={() => {
+                            this.setState(update(this.state, { activeMetric: {$set: id} }), () => {
+                                this.showMetric();
+                            })
+                        }} />
+
                     })}
                 </div>
             }}
