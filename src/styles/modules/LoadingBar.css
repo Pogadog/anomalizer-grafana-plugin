@@ -6,6 +6,7 @@
 
 .loading-bar[data-state="collapsed"] {
     width: 0%;
+    opacity: 0.7;
     transition-duration: inherit;
 }
 
