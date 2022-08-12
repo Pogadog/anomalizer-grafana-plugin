@@ -12,8 +12,8 @@ export default interface MetricImage {
         [key: string]: number
     }
     status: "normal" | "warning" | "critical"
-    tags: [{
+    tags: {
         [key: string]: string
-    }]
+    }[]
     type: string
 }

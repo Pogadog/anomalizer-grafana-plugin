@@ -4,6 +4,7 @@ import * as GrafanaUI from '@grafana/ui';
 import PlotlyAbstractionController from './PlotlyAbstractionController';
 import MetricFigure from 'types/MetricFigure';
 import MetricImage from 'types/MetricImage';
+import update from 'immutability-helper';
 
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
 }
 
 interface State {
-
+    tagFilter: string
 }
 
 interface TagDataFrame {
@@ -30,20 +31,58 @@ interface TagGridMap {
     [key: string]: any[]
 }
 
+interface TagSearchStrings {
+    [key: string]: string
+}
+
 export default class MetricModal extends Component<Props, State> {
 
     ref: React.RefObject<HTMLDivElement>;
+    tagFilterTimeout: NodeJS.Timeout | null;
 
     constructor(props: Props) {
         super(props);
         this.state = {
-
+            tagFilter: ""
         }
         this.ref = React.createRef();
+        this.tagFilterTimeout = null;
     }
 
     buildTagGrid = (tags: MetricImage["tags"]): TagDataFrame => {
         let tagGridMap: TagGridMap = {}
+
+        if (this.state.tagFilter) {
+            let searchStrings: TagSearchStrings = {};
+
+            tags.map((tag, index) => {
+                // refined regex tag search
+                searchStrings[index] = '"' + index + '": ' + JSON.stringify(tag, null, 1);
+            });
+
+            let matchingTags: MetricImage["tags"] = [];
+            let i = 0;
+            for (let tag in searchStrings) {
+                let searchString = searchStrings[tag];
+                if (searchString.match(`${this.state.tagFilter}`) || this.state.tagFilter.length < 1) {
+                    matchingTags.push(tags[i]);
+                }
+                i++;
+            }
+
+            tags = matchingTags;
+
+            console.log("reduced tags", tags);
+
+            if (tags.length < 1) {
+                return {
+                    name: '',
+                    fields: [],
+                }
+            }
+
+        }
+
         for (let tag of tags) {
             for (let point in tag) {
                 if (!tagGridMap[point]) tagGridMap[point] = [];
@@ -89,8 +128,22 @@ export default class MetricModal extends Component<Props, State> {
                     <p style={{ fontSize: 24}} >Metric</p>
                     <p style={{ marginLeft: 20 }} >{this.props.image?.metric}</p>
                     <p style={{ fontSize: 24}} >Tags</p>
+                    <GrafanaUI.Input prefix={<GrafanaUI.Icon name="search" />} placeholder="Search tags (regex)" onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+
+                        let v = e.target.value;
+                        this.tagFilterTimeout && clearTimeout(this.tagFilterTimeout);
+
+                        this.tagFilterTimeout = setTimeout(() => {
+                            this.setState(update(this.state, { tagFilter: {$set: v} }));
+                        }, 500);
+                    }} />
+                    <div style={{ height: 10 }} />
                     <div style={{ overflow: 'scroll', width:modalWidth }} >
-                        <GrafanaUI.Table width={modalWidth} height={400} data={toDataFrame(tags)} />
+                        {tags.fields.length > 0 && <GrafanaUI.Table width={modalWidth} height={400} data={toDataFrame(tags)} />}
+                        {tags.fields.length < 1 && <div style={{ width: modalWidth, height: 400, display: 'flex', flex: 1, justifyContent: 'flex-start', flexDirection: 'column', alignItems: 'center' }} >
+                            <GrafanaUI.Icon name="question-circle" size="xxl" style={{ color: 'gray' }} />
+                            <h2>No tags {this.state.tagFilter.length > 0 ? "match this filter" : "found"}</h2>
+                        </div>}
                     </div>
                     
                 </div>
