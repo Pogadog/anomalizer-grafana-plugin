@@ -1,0 +1,13 @@
+.logo-pop {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 250ms ease-out;
+}
+
+.logo-pop[data-animation="start"] {
+    opacity: 1;
+    transform: scale(1);
+    transition: all 3s cubic-bezier(0.01, 0.5, 0.5, 1);
+}

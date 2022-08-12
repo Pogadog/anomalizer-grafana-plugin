@@ -1,0 +1,8 @@
+.main-grid-load {
+    opacity: 0;
+}
+
+.main-grid-load[data-animation="start"] {
+    opacity: 1;
+    transition: all 250ms ease-out;
+}

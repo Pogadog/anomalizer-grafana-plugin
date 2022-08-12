@@ -24,7 +24,8 @@ interface State {
     showMetric: string | null,
     showMetricImage: MetricImage | null
     showMetricFigure: MetricFigure | null,
-    loadingBarPinAlternate: boolean
+    loadingBarPinAlternate: boolean,
+    logoPopAnimation: "stop" | "start"
 }
 export default class Main extends Component<Props, State> {
 
@@ -47,7 +48,8 @@ export default class Main extends Component<Props, State> {
             showMetric: null,
             showMetricImage: null,
             showMetricFigure: null,
-            loadingBarPinAlternate: false
+            loadingBarPinAlternate: false,
+            logoPopAnimation: "stop"
         }
         this.clock = new Clock();
         this.clockKeys = {
@@ -58,16 +60,33 @@ export default class Main extends Component<Props, State> {
     }
 
     componentDidMount = () => {
-        this.clock.addTask(this.clockKeys.metricFetch, async () => {
-            let r = await fetch(this.props.options.endpoint + '/images');
-            r = await r.json();
-            this.setState(update(this.state, { ready: {$set: true}, images: {$set: r}}), () => {
+        setTimeout(() => {
+            this.setState(update(this.state, { logoPopAnimation: {$set: "start"} }), () => {
                 setTimeout(() => {
-                    this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate } }));
-                }, 0);
+                    this.clock.addTask(this.clockKeys.metricFetch, async () => {
 
+                        let r = await fetch(this.props.options.endpoint + '/images');
+                        r = await r.json();
+
+                        this.setState(update(this.state, { logoPopAnimation: {$set: this.state.ready ? "start" : "stop"} }), () => {
+                            setTimeout(() => {
+                                this.setState(update(this.state, { ready: {$set: true}, images: {$set: r}}), () => {
+                                    setTimeout(() => {
+                                        this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate }, logoPopAnimation: {$set: "start"} }));
+                                    }, 0);
+                    
+                                })
+                            }, this.state.ready ? 0 : 250);
+                        })
+                        
+                        
+                        
+                    }, this.refreshInterval);
+                }, 3000);
             })
-        }, this.refreshInterval);
+        }, 100);
+        
+        
         //this.setState(update(this.state, { loadingBarStateAttr: {$set: 'collapsed'} }));
 
     }
@@ -117,13 +136,13 @@ export default class Main extends Component<Props, State> {
 
         return <GrafanaUI.ThemeContext.Consumer>
             {theme => {
-                if (!this.state.ready) return <div style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} >
-                    <GrafanaUI.LoadingPlaceholder text={`Loading metrics from ${this.props.options.endpoint}`} />
+                if (!this.state.ready) return <div style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: "100%", width: "100%" }} >
+                    <img className="logo-pop" src="https://anomalizer.app/logo.svg" data-animation={this.state.logoPopAnimation} />
                 </div>
         
-                return <div style={{ overflow: 'scroll', width: "100%", height: "100%" }}>
+                return <div className="main-grid-load" style={{ overflow: 'scroll', width: "100%", height: "100%" }} data-animation={this.state.logoPopAnimation} >
                     
-                    <div style={{ height: 2, borderRadius: 90, backgroundColor: this.state.loadingBarPinAlternate ? Theme.colors.palette.secondary : Theme.colors.palette.primary, marginLeft: this.state.loadingBarPinAlternate ? undefined : 'auto', marginRight: this.state.loadingBarPinAlternate ? undefined : 0 }} className="loading-bar" data-state={this.state.loadingBarPinAlternate ? "collapsed" : null} data-refresh-interval={this.refreshInterval} />
+                    <div style={{ height: 2, marginBottom: 5, borderRadius: 90, backgroundColor: this.state.loadingBarPinAlternate ? Theme.colors.palette.secondary : Theme.colors.palette.primary, marginLeft: this.state.loadingBarPinAlternate ? undefined : 'auto', marginRight: this.state.loadingBarPinAlternate ? undefined : 0, opacity: 0.8, transitionDuration: `${(this.refreshInterval / 1000) - .5}s` }} className="loading-bar" data-state={this.state.loadingBarPinAlternate ? "collapsed" : null} data-refresh-interval={this.refreshInterval} />
 
                     <MetricModal isOpen={this.state.showMetric !== null} onDismiss={this.hideMetric} figure={this.state.showMetricFigure} image={this.state.showMetricImage} />
 
