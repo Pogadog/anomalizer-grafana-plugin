@@ -53,7 +53,8 @@ export default class Main extends Component<Props, State> {
         }
         this.clock = new Clock();
         this.clockKeys = {
-            metricFetch: "metricFetch"
+            metricFetch: "metricFetch",
+            cleanUpReshadeCache: 'cleanUpReshadeCache'
         }
         this.refreshInterval = 30000;
         this.reshade = new Reshade();
@@ -76,15 +77,20 @@ export default class Main extends Component<Props, State> {
                                     }, 0);
                     
                                 })
-                            }, this.state.ready ? 0 : 250);
+                            }, this.state.ready ? 0 : 100);
                         })
                         
                         
                         
                     }, this.refreshInterval);
-                }, 3000);
+
+                    this.clock.addTask(this.clockKeys.cleanUpReshadeCache, () => {
+                        this.reshade.cleanUpCache(this.refreshInterval);
+                    }, this.refreshInterval);
+
+                }, 2000);
             })
-        }, 0);
+        }, 100);
         
         
         //this.setState(update(this.state, { loadingBarStateAttr: {$set: 'collapsed'} }));

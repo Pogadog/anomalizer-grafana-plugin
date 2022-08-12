@@ -1,17 +1,32 @@
 import MetricFigure from "types/MetricFigure";
-const md5 = require('md5');
-
 
 type MetricFigureLayout = MetricFigure["layout"];
 
 export default class Reshade {
 
     cache: {
-        [key: string]: string
+        [key: string]: {
+            img: string,
+            ts: number
+        }
     }
+
+    expire: number
 
     constructor() {
         this.cache = {}
+        this.expire = 1000 * 60;
+    }
+
+    cleanUpCache = (expire=this.expire): number => {
+        let i = 0;
+        for (let key in this.cache) {
+            if (this.cache[key].ts + expire < Date.now()) {
+                delete this.cache[key];
+                i++;
+            }
+        }
+        return i;
     }
 
     metricLayout = (layout: MetricFigureLayout): MetricFigureLayout => {
@@ -25,14 +40,14 @@ export default class Reshade {
 
     metricImage = (img: string): string => {
 
-        // take 512 char sample from img base64 starting at char 2048 and hash it
+        // take 512 char sample from img base64 starting at char 2048
 
-        let cacheKey = md5(img.slice(2048, 2560));
+        let cacheKey = img.slice(2048, 2560);
 
         let cache = this.cache[cacheKey]
 
         if (cache) {
-            return cache
+            return cache.img
         }
 
         let p = new DOMParser();
@@ -111,7 +126,10 @@ export default class Reshade {
 
         let result =  "data:image/svg+xml," + encodeURIComponent(new XMLSerializer().serializeToString(x))
 
-        this.cache[cacheKey] = result
+        this.cache[cacheKey] = {
+            img: result,
+            ts: Date.now()
+        }
     
         return result;
     }

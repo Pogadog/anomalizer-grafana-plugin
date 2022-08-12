@@ -4,5 +4,5 @@
 
 .main-grid-load[data-animation="start"] {
     opacity: 1;
-    transition: all 250ms ease-out;
+    transition: all 100ms ease-out;
 }
