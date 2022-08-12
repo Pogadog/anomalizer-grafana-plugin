@@ -1,8 +1,18 @@
 import MetricFigure from "types/MetricFigure";
+const md5 = require('md5');
+
 
 type MetricFigureLayout = MetricFigure["layout"];
 
 export default class Reshade {
+
+    cache: {
+        [key: string]: string
+    }
+
+    constructor() {
+        this.cache = {}
+    }
 
     metricLayout = (layout: MetricFigureLayout): MetricFigureLayout => {
 
@@ -14,6 +24,17 @@ export default class Reshade {
     }
 
     metricImage = (img: string): string => {
+
+        // take 512 char sample from img base64 starting at char 2048 and hash it
+
+        let cacheKey = md5(img.slice(2048, 2560));
+
+        let cache = this.cache[cacheKey]
+
+        if (cache) {
+            return cache
+        }
+
         let p = new DOMParser();
         let x = p.parseFromString(decodeURIComponent(img.split(",", 2)[1]), "image/svg+xml");
     
@@ -87,7 +108,11 @@ export default class Reshade {
             // set color of y axis label
             (x.getElementsByClassName("ytitle") as HTMLCollectionOf<HTMLElement>)[0].style.fill = "white";
         }
+
+        let result =  "data:image/svg+xml," + encodeURIComponent(new XMLSerializer().serializeToString(x))
+
+        this.cache[cacheKey] = result
     
-        return "data:image/svg+xml," + encodeURIComponent(new XMLSerializer().serializeToString(x))
+        return result;
     }
 }

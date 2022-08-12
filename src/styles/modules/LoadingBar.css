@@ -1,10 +1,10 @@
 .loading-bar {
     width: 100%;
-    transition: all 14.5s linear;
+    transition: all 29.5s linear;
 }
 
 .loading-bar[data-state="collapsed"] {
     width: 0%;
-    transition-duration:  14.5s;
+    transition-duration:  29.5s;
 }
 

@@ -35,6 +35,8 @@ export default class Main extends Component<Props, State> {
 
     refreshInterval: number;
 
+    reshade: Reshade;
+
     constructor(props: Props) {
         super(props);
         this.state = {
@@ -51,7 +53,8 @@ export default class Main extends Component<Props, State> {
         this.clockKeys = {
             metricFetch: "metricFetch"
         }
-        this.refreshInterval = 15000;
+        this.refreshInterval = 30000;
+        this.reshade = new Reshade();
     }
 
     componentDidMount = () => {
@@ -62,7 +65,7 @@ export default class Main extends Component<Props, State> {
                 setTimeout(() => {
                     this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate } }));
                 }, 0);
-                
+
             })
         }, this.refreshInterval);
         //this.setState(update(this.state, { loadingBarStateAttr: {$set: 'collapsed'} }));
@@ -103,11 +106,11 @@ export default class Main extends Component<Props, State> {
     }
 
     reshadeMetricLayout = (layout: MetricFigureLayout): MetricFigureLayout => {
-        return new Reshade().metricLayout(layout);
+        return this.reshade.metricLayout(layout);
     }
 
     reshadeMetricImage = (img: string): string => {
-        return new Reshade().metricImage(img);
+        return this.reshade.metricImage(img);
     }
 
     render = () => {
