@@ -5,7 +5,7 @@ import PlotlyAbstractionController from './PlotlyAbstractionController';
 import MetricFigure from 'types/MetricFigure';
 import MetricImage from 'types/MetricImage';
 import update from 'immutability-helper';
-
+import { v4 as uuid } from 'uuid';
 
 interface Props {
     isOpen: boolean
@@ -39,6 +39,7 @@ export default class MetricModal extends Component<Props, State> {
 
     ref: React.RefObject<HTMLDivElement>;
     tagFilterTimeout: NodeJS.Timeout | null;
+    tagControllerKey: string
 
     constructor(props: Props) {
         super(props);
@@ -47,12 +48,15 @@ export default class MetricModal extends Component<Props, State> {
         }
         this.ref = React.createRef();
         this.tagFilterTimeout = null;
+        this.tagControllerKey = "tagId-controllerKey-" + uuid();
     }
 
-    buildTagGrid = (tags: MetricImage["tags"]): TagDataFrame => {
+    buildTagGrid = (tags: MetricImage["tags"]): { dataFrameBuild: TagDataFrame, activeTags: string[] } => {
+        let activeTags: string[] = [];
         let tagGridMap: TagGridMap = {}
 
         if (this.state.tagFilter) {
+
             let searchStrings: TagSearchStrings = {};
 
             tags.map((tag, index) => {
@@ -65,26 +69,36 @@ export default class MetricModal extends Component<Props, State> {
             for (let tag in searchStrings) {
                 let searchString = searchStrings[tag];
                 if (searchString.match(`${this.state.tagFilter}`) || this.state.tagFilter.length < 1) {
-                    matchingTags.push(tags[i]);
+                    matchingTags.push({...tags[i], [this.tagControllerKey]: String(i)});
+                    activeTags.push(String(i));
                 }
                 i++;
             }
 
             tags = matchingTags;
 
-            console.log("reduced tags", tags);
-
             if (tags.length < 1) {
                 return {
-                    name: '',
-                    fields: [],
+                    dataFrameBuild: {
+                        name: '',
+                        fields: [],
+                    },
+                    activeTags 
                 }
             }
 
+        } else {
+            tags.map((_, index) => {
+                activeTags.push(String(index));
+            })
+            tags = tags.map((tag, i) => {
+                return {...tag, [this.tagControllerKey]: String(i)}
+            })
         }
 
         for (let tag of tags) {
             for (let point in tag) {
+                if (point === this.tagControllerKey) continue;
                 if (!tagGridMap[point]) tagGridMap[point] = [];
                 tagGridMap[point].push(String(tag[point]))
             }
@@ -96,8 +110,8 @@ export default class MetricModal extends Component<Props, State> {
             fields: [{
                 name: 'Tag',
                 type: FieldType.string,
-                values: tagGridMap[Object.keys(tagGridMap)[0]].map((tag, i) => {
-                    return String(i);
+                values: tags.map(tag => {
+                    return tag[this.tagControllerKey];
                 })
 
             }, ...Object.keys(tagGridMap).map(tag => {
@@ -105,7 +119,8 @@ export default class MetricModal extends Component<Props, State> {
             })],
         }
 
-        return dataFrameBuild;
+
+        return { dataFrameBuild, activeTags };
 
     }
 
@@ -113,7 +128,7 @@ export default class MetricModal extends Component<Props, State> {
 
         if (!this.props.figure || !this.props.image) return null;
 
-        let tags = this.buildTagGrid(this.props.image.tags);
+        let { dataFrameBuild: tags, activeTags } = this.buildTagGrid(this.props.image.tags);
 
         let modalWidth = this.ref.current?.getBoundingClientRect().width ?? 200;
 
@@ -123,7 +138,7 @@ export default class MetricModal extends Component<Props, State> {
                 {!this.props.figure && <div style={{ position: 'absolute' }} >
                     <GrafanaUI.LoadingPlaceholder  />
                 </div>}
-                {this.props.figure && <div style={{ borderRadius: 10 }} ><PlotlyAbstractionController data={this.props.figure.data} layout={this.props.figure.layout} style={{ width: 400, height: 400, borderRadius: 10 }} /></div>}
+                {this.props.figure && <div style={{ borderRadius: 10 }} ><PlotlyAbstractionController data={this.props.figure.data} layout={this.props.figure.layout} activeTags={activeTags} style={{ width: 400, height: 400, borderRadius: 10 }} /></div>}
                 <div style={{ alignSelf: 'flex-start' }} >
                     <p style={{ fontSize: 24}} >Metric</p>
                     <p style={{ marginLeft: 20 }} >{this.props.image?.metric}</p>

@@ -2,3 +2,7 @@
 .plotly .main-svg {
     border-radius: 10px !important;
 }
+
+.plotly .legendtoggle {
+    cursor: default !important;
+}
