@@ -124,6 +124,12 @@ export default class MetricModal extends Component<Props, State> {
 
     }
 
+    componentDidUpdate = (prevProps: Props) => {
+        if (this.props.image?.id !== prevProps.image?.id) {
+            this.setState(update(this.state, { tagFilter: {$set: ""} }));
+        }
+    }
+
     render = () => {
 
         if (!this.props.figure || !this.props.image) return null;
@@ -140,9 +146,8 @@ export default class MetricModal extends Component<Props, State> {
                 </div>}
                 {this.props.figure && <div style={{ borderRadius: 10 }} ><PlotlyAbstractionController data={this.props.figure.data} layout={this.props.figure.layout} activeTags={activeTags} style={{ width: 400, height: 400, borderRadius: 10 }} /></div>}
                 <div style={{ alignSelf: 'flex-start' }} >
-                    <p style={{ fontSize: 24}} >Metric</p>
-                    <p style={{ marginLeft: 20 }} >{this.props.image?.metric}</p>
-                    <p style={{ fontSize: 24}} >Tags</p>
+                    <div style={{ height: 10 }} />
+                    <h2>Tags</h2>
                     <GrafanaUI.Input prefix={<GrafanaUI.Icon name="search" />} placeholder="Search tags (regex)" onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 
                         let v = e.target.value;
@@ -154,12 +159,22 @@ export default class MetricModal extends Component<Props, State> {
                     }} />
                     <div style={{ height: 10 }} />
                     <div style={{ overflow: 'scroll', width:modalWidth }} >
-                        {tags.fields.length > 0 && <GrafanaUI.Table width={modalWidth} height={400} data={toDataFrame(tags)} />}
-                        {tags.fields.length < 1 && <div style={{ width: modalWidth, height: 400, display: 'flex', flex: 1, justifyContent: 'flex-start', flexDirection: 'column', alignItems: 'center' }} >
+                        {tags.fields.length > 0 && <GrafanaUI.Table width={modalWidth} height={200} data={toDataFrame(tags)} />}
+                        {tags.fields.length < 1 && <div style={{ width: modalWidth, height: 200, display: 'flex', flex: 1, justifyContent: 'flex-start', flexDirection: 'column', alignItems: 'center' }} >
                             <GrafanaUI.Icon name="question-circle" size="xxl" style={{ color: 'gray' }} />
                             <h2>No tags {this.state.tagFilter.length > 0 ? "match this filter" : "found"}</h2>
                         </div>}
                     </div>
+                    <div style={{ height: 20 }} />
+                    <h2>Stats:</h2>
+                    <pre>{JSON.stringify(this.props.image.stats, null, 4)}</pre>
+                    <div style={{ height: 10 }} />
+                    <h2>Features:</h2>
+                    <pre>{JSON.stringify(this.props.image.features, null, 4)}</pre>
+                    <div style={{ height: 10 }} />
+                    <h2>Metric ID:</h2>
+                    <pre>{this.props.image.id}</pre>
+
                     
                 </div>
             </div>
