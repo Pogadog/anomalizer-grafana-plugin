@@ -5,4 +5,12 @@ export interface Options {
   showSeriesCount: boolean;
   seriesCountSize: SeriesSize;
   metricType: string;
+  primaryUIFilter: string;
+  primaryUIFilterInvert: 'match' | 'notMatch';
+  primaryServerFilter: string;
+  primaryServerFilterInvert: 'match' | 'notMatch';
+  secondaryUIFilter: string;
+  secondaryUIFilterInvert: 'match' | 'notMatch';
+  secondaryServerFilter: string;
+  secondaryServerFilterInvert: 'match' | 'notMatch';
 }

@@ -15,17 +15,48 @@ import Reshade from './Reshade';
 
 type MetricFigureLayout = MetricFigure["layout"];
 
+interface Filters {
+    primary: {
+        UI: {
+            filter: string,
+            invert: 'match' | 'notMatch'
+        },
+        server: {
+            filter: string,
+            invert: 'match' | 'notMatch'
+        }
+        
+    },
+    secondary: {
+        UI: {
+            filter: string,
+            invert: 'match' | 'notMatch'
+        },
+        server: {
+            filter: string,
+            invert: 'match' | 'notMatch'
+        }
+    }
+}
+
 interface Props extends PanelProps<Options> {};
 interface State {
     showModal: boolean,
     ready: boolean,
-    images: any,
+    images: {
+        [key: string]: MetricImage
+    },
+    renderedImages: {
+        [key: string]: MetricImage
+    }
     activeMetric: string,
     showMetric: string | null,
     showMetricImage: MetricImage | null
     showMetricFigure: MetricFigure | null,
     loadingBarPinAlternate: boolean,
-    logoPopAnimation: "stop" | "start"
+    logoPopAnimation: "stop" | "start",
+    filters: Filters,
+    metricsRefreshKey: number
 }
 export default class Main extends Component<Props, State> {
 
@@ -38,40 +69,115 @@ export default class Main extends Component<Props, State> {
 
     reshade: Reshade;
 
+    processIncomingFiltersTimeout: NodeJS.Timer | undefined
+
     constructor(props: Props) {
         super(props);
         this.state = {
+            metricsRefreshKey: Date.now(),
             showModal: false,
             ready: false,
             images: {},
+            renderedImages: {},
             activeMetric: '',
             showMetric: null,
             showMetricImage: null,
             showMetricFigure: null,
             loadingBarPinAlternate: false,
-            logoPopAnimation: "stop"
+            logoPopAnimation: "stop",
+            filters: {
+                primary: {
+                    UI: {
+                        filter: '',
+                        invert: 'match'
+                    },
+                    server: {
+                        filter: '',
+                        invert: 'match'
+                    }
+                    
+                },
+                secondary: {
+                    UI: {
+                        filter: '',
+                        invert: 'match'
+                    },
+                    server: {
+                        filter: '',
+                        invert: 'match'
+                    }
+                }
+            }
+
         }
         this.clock = new Clock();
         this.clockKeys = {
             metricFetch: "metricFetch",
-            cleanUpReshadeCache: 'cleanUpReshadeCache'
+            cleanUpReshadeCache: 'cleanUpReshadeCache',
+            runFilters: 'runFilters'
         }
         this.refreshInterval = 30000;
         this.reshade = new Reshade();
     }
 
+    processIncomingFilters = async () => {
+        this.setState(update(this.state, { filters: {$set: {
+            primary: {
+                UI: {
+                    filter: this.props.options.primaryUIFilter || '',
+                    invert: this.props.options.primaryUIFilterInvert
+                },
+                server: {
+                    filter: this.props.options.primaryServerFilter || '',
+                    invert: this.props.options.primaryServerFilterInvert
+                }
+            },
+            secondary: {
+                UI: {
+                    filter: this.props.options.secondaryUIFilter || '',
+                    invert: this.props.options.secondaryUIFilterInvert
+                },
+                server: {
+                    filter: this.props.options.secondaryServerFilter || '',
+                    invert: this.props.options.secondaryServerFilterInvert
+                }
+            }
+        }} }), () => {
+            this.processImages();
+            /*
+            fetch(this.props.options.endpoint + '/filter', { 
+                method: 'POST',
+                headers: {
+                    'Accept-Type': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    query: this.props.options.primaryServerFilter,
+                    query2: this.props.options.secondaryServerFilter,
+                    invert: this.props.options.primaryServerFilterInvert === 'notMatch',
+                    invert2: this.props.options.secondaryServerFilterInvert === 'notMatch'
+                })
+            })
+            */
+        })
+    }
+
     componentDidMount = () => {
+
+        this.processIncomingFilters();
+
         setTimeout(() => {
             this.setState(update(this.state, { logoPopAnimation: {$set: "start"} }), () => {
                 setTimeout(() => {
                     this.clock.addTask(this.clockKeys.metricFetch, async () => {
 
                         let r = await fetch(this.props.options.endpoint + '/images');
-                        r = await r.json();
+                        let images = await r.json();
 
                         this.setState(update(this.state, { logoPopAnimation: {$set: this.state.ready ? "start" : "stop"} }), () => {
                             setTimeout(() => {
-                                this.setState(update(this.state, { ready: {$set: true}, images: {$set: r}}), () => {
+                                this.setState(update(this.state, { ready: {$set: true}, images: {$set: images}}), () => {
+                                    this.processImages();
                                     setTimeout(() => {
                                         this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate }, logoPopAnimation: {$set: "start"} }));
                                     }, 0);
@@ -95,6 +201,12 @@ export default class Main extends Component<Props, State> {
         
         //this.setState(update(this.state, { loadingBarStateAttr: {$set: 'collapsed'} }));
 
+    }
+
+    componentDidUpdate = (prevProps: Props) => {
+        if (JSON.stringify(this.props.options) !== JSON.stringify(prevProps.options)) {
+            this.processIncomingFilters();
+        }
     }
 
     componentWillUnmount = () => {
@@ -138,10 +250,52 @@ export default class Main extends Component<Props, State> {
         return this.reshade.metricImage(img);
     }
 
+    processImages = () => {
+
+        console.log("will process", this.state.images);
+
+        let images = {...this.state.images};
+
+        if (this.state.filters.primary.UI.filter.length) {
+            for (let chartId in images) {
+
+                let chart: MetricImage = images[chartId];
+    
+                let searchString = chart.metric + ',' + JSON.stringify(chart.tags) + ',' + JSON.stringify({status: chart.status}) + ',' + chart.type + ',' + JSON.stringify({ features: chart.features }) + ',' + JSON.stringify({ cardinality: chart.cardinality }) + ',' + JSON.stringify({ plot: chart.plot });
+    
+                try {
+                    if (this.state.filters.primary.UI.invert === 'notMatch') {
+                        if (searchString.match(`${this.state.filters.primary.UI.filter}`)) {
+                            delete images[chartId];
+                            continue;
+                        }
+                    } else {
+                        if (!searchString.match(`${this.state.filters.primary.UI.filter}`)) {
+                            delete images[chartId];
+                            continue;
+                        }
+                    }
+                    
+                } catch (e) {
+                    delete images[chartId];
+                    continue;
+                }
+    
+            }
+        }
+
+        
+
+        console.log("will set rendered images", images, 'to filter', this.state.filters.primary.UI.filter);
+        
+        this.setState(update(this.state, { renderedImages: {$set: images} }));
+    }
+
     render = () => {
 
         return <GrafanaUI.ThemeContext.Consumer>
             {theme => {
+
                 if (!this.state.ready) return <div style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: "100%", width: "100%" }} >
                     <img className="logo-pop" src="https://anomalizer.app/logo.svg" data-animation={this.state.logoPopAnimation} />
                 </div>
@@ -152,7 +306,7 @@ export default class Main extends Component<Props, State> {
 
                     <MetricModal isOpen={this.state.showMetric !== null} onDismiss={this.hideMetric} figure={this.state.showMetricFigure} image={this.state.showMetricImage} />
 
-                    {Object.keys(this.state.images).map((id, i) => {
+                    {Object.keys(this.state.renderedImages).map((id, i) => {
                         
                         let metric = this.state.images[id];
                         if (metric.plot !== this.props.options.metricType) return null;
@@ -166,6 +320,8 @@ export default class Main extends Component<Props, State> {
                         }} />
 
                     })}
+
+                    
                 </div>
             }}
         </GrafanaUI.ThemeContext.Consumer>
