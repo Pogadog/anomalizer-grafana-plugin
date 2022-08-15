@@ -121,45 +121,47 @@ export default class Main extends Component<Props, State> {
     }
 
     processIncomingFilters = async () => {
-        this.setState(update(this.state, { filters: {$set: {
-            primary: {
-                UI: {
-                    filter: this.props.options.primaryUIFilter || '',
-                    invert: this.props.options.primaryUIFilterInvert
+        this.processIncomingFiltersTimeout && clearTimeout(this.processIncomingFiltersTimeout);
+        this.processIncomingFiltersTimeout = setTimeout(() => {
+            this.setState(update(this.state, { filters: {$set: {
+                primary: {
+                    UI: {
+                        filter: this.props.options.primaryUIFilter || '',
+                        invert: this.props.options.primaryUIFilterInvert
+                    },
+                    server: {
+                        filter: this.props.options.primaryServerFilter || '',
+                        invert: this.props.options.primaryServerFilterInvert
+                    }
                 },
-                server: {
-                    filter: this.props.options.primaryServerFilter || '',
-                    invert: this.props.options.primaryServerFilterInvert
+                secondary: {
+                    UI: {
+                        filter: this.props.options.secondaryUIFilter || '',
+                        invert: this.props.options.secondaryUIFilterInvert
+                    },
+                    server: {
+                        filter: this.props.options.secondaryServerFilter || '',
+                        invert: this.props.options.secondaryServerFilterInvert
+                    }
                 }
-            },
-            secondary: {
-                UI: {
-                    filter: this.props.options.secondaryUIFilter || '',
-                    invert: this.props.options.secondaryUIFilterInvert
-                },
-                server: {
-                    filter: this.props.options.secondaryServerFilter || '',
-                    invert: this.props.options.secondaryServerFilterInvert
-                }
-            }
-        }} }), () => {
-            this.processImages();
-            /*
-            fetch(this.props.options.endpoint + '/filter', { 
-                method: 'POST',
-                headers: {
-                    'Accept-Type': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    query: this.props.options.primaryServerFilter,
-                    query2: this.props.options.secondaryServerFilter,
-                    invert: this.props.options.primaryServerFilterInvert === 'notMatch',
-                    invert2: this.props.options.secondaryServerFilterInvert === 'notMatch'
+            }} }), async () => {
+                
+                await fetch(this.props.options.endpoint + '/filter', { 
+                    method: 'POST',
+                    headers: {
+                        'Accept-Type': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        query: this.props.options.primaryServerFilter,
+                        //query2: this.props.options.secondaryServerFilter,
+                        invert: this.props.options.primaryServerFilterInvert === 'notMatch',
+                        //invert2: this.props.options.secondaryServerFilterInvert === 'notMatch'
+                    })
                 })
+                this.renderImages();
             })
-            */
-        })
+        }, 500);
     }
 
     componentDidMount = () => {
@@ -177,7 +179,7 @@ export default class Main extends Component<Props, State> {
                         this.setState(update(this.state, { logoPopAnimation: {$set: this.state.ready ? "start" : "stop"} }), () => {
                             setTimeout(() => {
                                 this.setState(update(this.state, { ready: {$set: true}, images: {$set: images}}), () => {
-                                    this.processImages();
+                                    this.renderImages();
                                     setTimeout(() => {
                                         this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate }, logoPopAnimation: {$set: "start"} }));
                                     }, 0);
@@ -250,13 +252,11 @@ export default class Main extends Component<Props, State> {
         return this.reshade.metricImage(img);
     }
 
-    processImages = () => {
-
-        console.log("will process", this.state.images);
+    renderImages = () => {
 
         let images = {...this.state.images};
 
-        if (this.state.filters.primary.UI.filter.length) {
+        if (this.state.filters.primary.UI.filter.length || this.state.filters.secondary.UI.filter.length) {
             for (let chartId in images) {
 
                 let chart: MetricImage = images[chartId];
@@ -275,7 +275,21 @@ export default class Main extends Component<Props, State> {
                             continue;
                         }
                     }
+
+                    if (this.state.filters.secondary.UI.invert === 'notMatch') {
+                        if (searchString.match(`${this.state.filters.secondary.UI.filter}`)) {
+                            delete images[chartId];
+                            continue;
+                        }
+                    } else {
+                        if (!searchString.match(`${this.state.filters.secondary.UI.filter}`)) {
+                            delete images[chartId];
+                            continue;
+                        }
+                    }
+
                     
+
                 } catch (e) {
                     delete images[chartId];
                     continue;
@@ -283,15 +297,13 @@ export default class Main extends Component<Props, State> {
     
             }
         }
-
-        
-
-        console.log("will set rendered images", images, 'to filter', this.state.filters.primary.UI.filter);
         
         this.setState(update(this.state, { renderedImages: {$set: images} }));
     }
 
     render = () => {
+
+
 
         return <GrafanaUI.ThemeContext.Consumer>
             {theme => {
