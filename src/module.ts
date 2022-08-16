@@ -20,6 +20,20 @@ export const plugin = new PanelPlugin<Options>(Panel).setPanelOptions(builder =>
         ],
       },
       defaultValue: 'timeseries',
+    }).addRadio({
+      name: 'Refresh Rate',
+      description: 'The rate at which the metrics should be refreshed',
+      path: 'refreshRate',
+      settings: {
+        options: [
+          { value: '10000', label: '10s' },
+          { value: '30000', label: '30s' },
+          { value: '60000', label: '60s' },
+          { value: '120000', label: '2m' },
+          { value: '300000', label: '5m' },
+        ],
+      },
+      defaultValue: '30000',
     }).addTextInput({
       path: 'primaryUIFilter',
       name: 'Primary UI Filter',

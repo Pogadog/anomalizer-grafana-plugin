@@ -5,6 +5,7 @@ export interface Options {
   showSeriesCount: boolean;
   seriesCountSize: SeriesSize;
   metricType: string;
+  refreshRate: string;
   primaryUIFilter: string;
   primaryUIFilterInvert: 'match' | 'notMatch';
   primaryServerFilter: string;

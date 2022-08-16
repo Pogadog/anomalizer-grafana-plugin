@@ -65,7 +65,7 @@ export default class Main extends Component<Props, State> {
         [key: string]: string
     }
 
-    refreshInterval: number;
+    refreshInterval: () => number;
 
     reshade: Reshade;
 
@@ -116,7 +116,9 @@ export default class Main extends Component<Props, State> {
             cleanUpReshadeCache: 'cleanUpReshadeCache',
             runFilters: 'runFilters'
         }
-        this.refreshInterval = 30000;
+        this.refreshInterval = () => {
+            return Number(this.props.options.refreshRate);
+        };
         this.reshade = new Reshade();
     }
 
@@ -164,6 +166,36 @@ export default class Main extends Component<Props, State> {
         }, 500);
     }
 
+    registerClocks = () => {
+        this.clock.removeTask(this.clockKeys.metricFetch);
+        this.clock.removeTask(this.clockKeys.cleanUpReshadeCache);
+
+        this.clock.addTask(this.clockKeys.metricFetch, async () => {
+
+            let r = await fetch(this.props.options.endpoint + '/images');
+            let images = await r.json();
+
+            this.setState(update(this.state, { logoPopAnimation: {$set: this.state.ready ? "start" : "stop"} }), () => {
+                setTimeout(() => {
+                    this.setState(update(this.state, { ready: {$set: true}, images: {$set: images}}), () => {
+                        this.renderImages();
+                        setTimeout(() => {
+                            this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate }, logoPopAnimation: {$set: "start"} }));
+                        }, 0);
+        
+                    })
+                }, this.state.ready ? 0 : 100);
+            })
+            
+            
+            
+        }, this.refreshInterval());
+
+        this.clock.addTask(this.clockKeys.cleanUpReshadeCache, () => {
+            this.reshade.cleanUpCache(this.refreshInterval());
+        }, this.refreshInterval());
+    }
+
     componentDidMount = () => {
 
         this.processIncomingFilters();
@@ -171,31 +203,7 @@ export default class Main extends Component<Props, State> {
         setTimeout(() => {
             this.setState(update(this.state, { logoPopAnimation: {$set: "start"} }), () => {
                 setTimeout(() => {
-                    this.clock.addTask(this.clockKeys.metricFetch, async () => {
-
-                        let r = await fetch(this.props.options.endpoint + '/images');
-                        let images = await r.json();
-
-                        this.setState(update(this.state, { logoPopAnimation: {$set: this.state.ready ? "start" : "stop"} }), () => {
-                            setTimeout(() => {
-                                this.setState(update(this.state, { ready: {$set: true}, images: {$set: images}}), () => {
-                                    this.renderImages();
-                                    setTimeout(() => {
-                                        this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate }, logoPopAnimation: {$set: "start"} }));
-                                    }, 0);
-                    
-                                })
-                            }, this.state.ready ? 0 : 100);
-                        })
-                        
-                        
-                        
-                    }, this.refreshInterval);
-
-                    this.clock.addTask(this.clockKeys.cleanUpReshadeCache, () => {
-                        this.reshade.cleanUpCache(this.refreshInterval);
-                    }, this.refreshInterval);
-
+                    this.registerClocks();
                 }, 2000);
             })
         }, 100);
@@ -208,6 +216,9 @@ export default class Main extends Component<Props, State> {
     componentDidUpdate = (prevProps: Props) => {
         if (JSON.stringify(this.props.options) !== JSON.stringify(prevProps.options)) {
             this.processIncomingFilters();
+        }
+        if (this.props.options.refreshRate !== prevProps.options.refreshRate) {
+            this.registerClocks();
         }
     }
 
@@ -314,7 +325,7 @@ export default class Main extends Component<Props, State> {
         
                 return <div className="main-grid-load" style={{ overflow: 'scroll', width: "100%", height: "100%" }} data-animation={this.state.logoPopAnimation} >
                     
-                    <div style={{ height: 2, marginBottom: 10, borderRadius: 90, backgroundColor: this.state.loadingBarPinAlternate ? Theme.colors.palette.secondary : Theme.colors.palette.primary, marginLeft: this.state.loadingBarPinAlternate ? undefined : 'auto', marginRight: this.state.loadingBarPinAlternate ? undefined : 0, transitionDuration: `${(this.refreshInterval / 1000) - .5}s` }} className="loading-bar" data-state={this.state.loadingBarPinAlternate ? "collapsed" : null} data-refresh-interval={this.refreshInterval} />
+                    <div style={{ height: 2, marginBottom: 10, borderRadius: 90, backgroundColor: this.state.loadingBarPinAlternate ? Theme.colors.palette.secondary : Theme.colors.palette.primary, marginLeft: this.state.loadingBarPinAlternate ? undefined : 'auto', marginRight: this.state.loadingBarPinAlternate ? undefined : 0, transitionDuration: `${(this.refreshInterval() / 1000) - .5}s` }} className="loading-bar" data-state={this.state.loadingBarPinAlternate ? "collapsed" : null} data-refresh-interval={this.refreshInterval()} />
 
                     <MetricModal isOpen={this.state.showMetric !== null} onDismiss={this.hideMetric} figure={this.state.showMetricFigure} image={this.state.showMetricImage} />
 
