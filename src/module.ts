@@ -20,6 +20,22 @@ export const plugin = new PanelPlugin<Options>(Panel).setPanelOptions(builder =>
         ],
       },
       defaultValue: 'timeseries',
+    }).addSelect({
+      name: 'Metric Sort',
+      description: 'How the metrics should be sorted',
+      path: 'metricWeightPreference',
+      settings: {
+        options: [
+          { value: 'Alpha', label: 'Alpha' },
+          { value: 'max', label: 'Max' },
+          { value: 'rmax', label: '-Max' },
+          { value: 'mean', label: 'Mean' },
+          { value: 'rstd', label: 'RSTD' },
+          { value: 'spike', label: 'Spike' },
+          
+        ],
+      },
+      defaultValue: 'rstd',
     }).addRadio({
       name: 'Refresh Rate',
       description: 'The rate at which the metrics should be refreshed',

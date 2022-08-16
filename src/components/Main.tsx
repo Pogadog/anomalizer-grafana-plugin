@@ -315,7 +315,34 @@ export default class Main extends Component<Props, State> {
         }
 
         for (let metricId in images) {
-            sortedMetrics[images[metricId].status].push(images[metricId]);
+
+            let chart = images[metricId];
+
+            let weight = (
+                this.props.options.metricWeightPreference === 'alpha' ? -chart.metric.charCodeAt(0): 
+                this.props.options.metricWeightPreference === 'spike' ? chart.stats.spike: 
+                this.props.options.metricWeightPreference === 'rstd' ? chart.stats.rstd : 
+                this.props.options.metricWeightPreference === 'max' ? chart.stats.max : 
+                this.props.options.metricWeightPreference === 'rmax' ? chart.stats.rmax : 
+                this.props.options.metricWeightPreference === 'mean' ? chart.stats.mean : 
+                chart.stats.std) + Math.abs((chart.features.increasing?.increase ?? 0) + (chart.features.decreasing?.decrease ?? 0)) + (Math.abs(chart.features.hockeystick?.increasing || chart.features.hockeystick?.increasing || 0)); 
+
+            chart.weight = weight;
+
+            sortedMetrics[images[metricId].status].push(chart);
+        }
+
+        for (let status in sortedMetrics) {
+            sortedMetrics[status] = sortedMetrics[status].sort((a, b) => {
+                if ( a.weight < b.weight ){
+                    return 1;
+                }
+                if ( a.weight > b.weight ){
+                    return -1;
+                }
+
+                return 0;
+            })
         }
 
 

@@ -17,8 +17,13 @@ export default interface MetricImage {
             [key: string]: { 
                 [key in "gaussian" | "left-tailed" | "right-tailed"]: number
             } 
+        },
+        hockeystick: {
+            increasing?: number,
+            decreasing?: number
         }
-    }
+    },
+    weight: number,
     id: string
     img: string
     metric: string

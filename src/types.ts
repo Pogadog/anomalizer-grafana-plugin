@@ -14,4 +14,5 @@ export interface Options {
   secondaryUIFilterInvert: 'match' | 'notMatch';
   secondaryServerFilter: string;
   secondaryServerFilterInvert: 'match' | 'notMatch';
+  metricWeightPreference: "alpha" | "spike" | "rstd" | "max" | "rmax" | "mean";
 }
