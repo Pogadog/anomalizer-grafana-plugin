@@ -46,9 +46,7 @@ interface State {
     images: {
         [key: string]: MetricImage
     },
-    renderedImages: {
-        [key: string]: MetricImage
-    }
+    renderedImages: MetricImage[]
     activeMetric: string,
     showMetric: string | null,
     showMetricImage: MetricImage | null
@@ -78,7 +76,7 @@ export default class Main extends Component<Props, State> {
             showModal: false,
             ready: false,
             images: {},
-            renderedImages: {},
+            renderedImages: [],
             activeMetric: '',
             showMetric: null,
             showMetricImage: null,
@@ -308,8 +306,19 @@ export default class Main extends Component<Props, State> {
     
             }
         }
-        
-        this.setState(update(this.state, { renderedImages: {$set: images} }));
+
+        let sortedMetrics: {[key: string]: MetricImage[]} = {
+            critical: [],
+            warning: [],
+            normal: []
+        }
+
+        for (let metricId in images) {
+            sortedMetrics[images[metricId].status].push(images[metricId]);
+        }
+
+
+        this.setState(update(this.state, { renderedImages: {$set: [...sortedMetrics.critical, ...sortedMetrics.warning, ...sortedMetrics.normal]} }));
     }
 
     render = () => {
@@ -329,15 +338,14 @@ export default class Main extends Component<Props, State> {
 
                     <MetricModal isOpen={this.state.showMetric !== null} onDismiss={this.hideMetric} figure={this.state.showMetricFigure} image={this.state.showMetricImage} />
 
-                    {Object.keys(this.state.renderedImages).map((id, i) => {
+                    {this.state.renderedImages.map((metric, i) => {
                         
-                        let metric = this.state.images[id];
                         if (metric.plot !== this.props.options.metricType) return null;
 
                         metric.img = this.reshadeMetricImage(metric.img);
 
                         return <MetricGridSquare metric={metric} onClick={() => {
-                            this.setState(update(this.state, { activeMetric: {$set: id} }), () => {
+                            this.setState(update(this.state, { activeMetric: {$set: metric.id} }), () => {
                                 this.showMetric();
                             })
                         }} />
