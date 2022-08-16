@@ -1,7 +1,23 @@
 export default interface MetricImage {
     cardinality: string
     features: {
-        [key: string]: number | string
+        cluster?: number,
+        clusters?: string[]
+        noisy?: {
+            snr: number
+        },
+        normalized_features?: number,
+        increasing?: {
+            increase: number
+        },
+        decreasing?: {
+            decrease: number
+        },
+        distribution?: {
+            [key: string]: { 
+                [key in "gaussian" | "left-tailed" | "right-tailed"]: number
+            } 
+        }
     }
     id: string
     img: string

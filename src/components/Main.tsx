@@ -15,6 +15,7 @@ import Reshade from './Reshade';
 
 type MetricFigureLayout = MetricFigure["layout"];
 
+const logo = require("../img/logo.svg");
 interface Filters {
     primary: {
         UI: {
@@ -329,7 +330,7 @@ export default class Main extends Component<Props, State> {
             {theme => {
 
                 if (!this.state.ready) return <div style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: "100%", width: "100%" }} >
-                    <img className="logo-pop" src="https://anomalizer.app/logo.svg" data-animation={this.state.logoPopAnimation} />
+                    <img className="logo-pop" src={logo} data-animation={this.state.logoPopAnimation} />
                 </div>
         
                 return <div className="main-grid-load" style={{ overflow: 'scroll', width: "100%", height: "100%" }} data-animation={this.state.logoPopAnimation} >
