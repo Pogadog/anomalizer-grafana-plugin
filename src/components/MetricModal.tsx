@@ -173,7 +173,7 @@ export default class MetricModal extends Component<Props, State> {
 
                             let setTag = () => {
                                 if (this.tagFilterRef.current) {
-                                    let v = `"${tagId}`;
+                                    let v = `"${tagId}":`;
                                     this.tagFilterRef.current.value = v;
                                     this.setState(update(this.state, { tagFilter: {$set: v} }));
                                 }

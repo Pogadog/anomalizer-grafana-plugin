@@ -33,8 +33,8 @@ class DistributionIndicator extends Component<Props, State> {
 
         if (testMode) {
             distributionsBuild.gaussian = true;
-            distributionsBuild['left-tail'] = true;
-            distributionsBuild['right-tail'] = true;
+            distributionsBuild['left-tailed'] = true;
+            distributionsBuild['right-tailed'] = true;
             distributionsBuild['bi-modal'] = true;
 
         }
@@ -57,8 +57,8 @@ class DistributionIndicator extends Component<Props, State> {
 
         return <div style={{...this.props.style}} onClick={this.props.onClick} >
             <img src={gaussian} style={{ position: 'absolute', width: 200 / 4, height: 50 / 4, opacity: distributionsBuild.gaussian ? 1 : 0.1 }} />
-            <img src={leftTail} style={{ position: 'absolute', width: 200 / 4, height: 50 / 4, opacity: distributionsBuild['left-tail'] ? 1 : 0.1 }} />
-            <img src={rightTail} style={{ position: 'absolute', width: 200 / 4, height: 50 / 4, opacity: distributionsBuild['right-tail'] ? 1 : 0.1 }} />
+            <img src={leftTail} style={{ position: 'absolute', width: 200 / 4, height: 50 / 4, opacity: distributionsBuild['left-tailed'] ? 1 : 0.1 }} />
+            <img src={rightTail} style={{ position: 'absolute', width: 200 / 4, height: 50 / 4, opacity: distributionsBuild['right-tailed'] ? 1 : 0.1 }} />
             <img src={biModal} style={{ position: 'absolute', width: 200 / 4, height: 50 / 4, opacity: distributionsBuild['bi-modal'] ? 1 : 0.1 }} />
         </div>;
     }

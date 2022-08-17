@@ -1,2 +1,2 @@
-export type DistributionTypes = "gaussian" | "left-tail" | "right-tail" | "bi-modal";
-export const DistributionTypesAsConst = ["gaussian", "left-tail", "right-tail", "bi-modal"];
+export type DistributionTypes = "gaussian" | "left-tailed" | "right-tailed" | "bi-modal";
+export const DistributionTypesAsConst = ["gaussian", "left-tailed", "right-tailed", "bi-modal"];
