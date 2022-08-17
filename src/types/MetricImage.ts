@@ -1,3 +1,5 @@
+import { DistributionTypes } from "./DistributionTypes"
+
 export default interface MetricImage {
     cardinality: string
     features: {
@@ -14,9 +16,7 @@ export default interface MetricImage {
             decrease: number
         },
         distribution?: {
-            [key: string]: { 
-                [key in "gaussian" | "left-tailed" | "right-tailed"]: number
-            } 
+            [key: string]: DistributionTypes
         },
         hockeystick: {
             increasing?: number,
