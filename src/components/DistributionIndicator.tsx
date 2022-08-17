@@ -4,9 +4,9 @@ import MetricImage from 'types/MetricImage';
 
 const gaussian = require("../img/icons/gaussian.svg");
 const leftTail = require("../img/icons/leftTail.svg");
-
-
 const rightTail = require("../img/icons/rightTail.svg");
+const biModal = require("../img/icons/biModal.svg");
+
 
 type DistributionsBuild = {
     [key in DistributionTypes]?: boolean;
@@ -14,7 +14,9 @@ type DistributionsBuild = {
 
 interface Props {
     style?: React.CSSProperties,
-    metric: MetricImage
+    metric?: MetricImage,
+    individual?: DistributionTypes,
+    onClick?: () => void
 }
 
 interface State {
@@ -25,22 +27,39 @@ class DistributionIndicator extends Component<Props, State> {
 
     render = () => {
 
+        let testMode = false; // set to true to test all the indicators
+
         let distributionsBuild: DistributionsBuild = {}
 
-        for (let tagId in this.props.metric.features.distribution) {
-            let distribution = this.props.metric.features.distribution[tagId];
+        if (testMode) {
+            distributionsBuild.gaussian = true;
+            distributionsBuild['left-tail'] = true;
+            distributionsBuild['right-tail'] = true;
+            distributionsBuild['bi-modal'] = true;
 
-            if (DistributionTypesAsConst.includes(distribution)) {
-                distributionsBuild[distribution] = true;
-            }
         }
 
-        if (Object.keys(distributionsBuild).length < 1) return null;
+        if (this.props.metric) {
+            for (let tagId in this.props.metric.features.distribution) {
+                let distribution = this.props.metric.features.distribution[tagId];
+    
+                if (DistributionTypesAsConst.includes(distribution)) {
+                    distributionsBuild[distribution] = true;
+                }
+            }
+    
+            
+        } else if (this.props.individual) {
+            distributionsBuild[this.props.individual] = true;
+        }
 
-        return <div >
-            <img src={gaussian} style={{ ...this.props.style, width: 200 / 4, height: 50 / 4, opacity: distributionsBuild.gaussian ? 1 : 0.1 }} />
-            <img src={leftTail} style={{ ...this.props.style, width: 200 / 4, height: 50 / 4, opacity: distributionsBuild['left-tail'] ? 1 : 0.1 }} />
-            <img src={rightTail} style={{ ...this.props.style, width: 200 / 4, height: 50 / 4, opacity: distributionsBuild['right-tail'] ? 1 : 0.1 }} />
+        //if (Object.keys(distributionsBuild).length < 1) return null;
+
+        return <div style={{...this.props.style}} onClick={this.props.onClick} >
+            <img src={gaussian} style={{ position: 'absolute', width: 200 / 4, height: 50 / 4, opacity: distributionsBuild.gaussian ? 1 : 0.1 }} />
+            <img src={leftTail} style={{ position: 'absolute', width: 200 / 4, height: 50 / 4, opacity: distributionsBuild['left-tail'] ? 1 : 0.1 }} />
+            <img src={rightTail} style={{ position: 'absolute', width: 200 / 4, height: 50 / 4, opacity: distributionsBuild['right-tail'] ? 1 : 0.1 }} />
+            <img src={biModal} style={{ position: 'absolute', width: 200 / 4, height: 50 / 4, opacity: distributionsBuild['bi-modal'] ? 1 : 0.1 }} />
         </div>;
     }
 

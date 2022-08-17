@@ -26,7 +26,7 @@ export default class MetricGridSquare extends Component<Props, State> {
             {this.props.metric.features.hockeystick?.increasing && <MetricIcon name="hockeystickIncreasing" size={14} theme="secondary" style={{ position: 'absolute', bottom: 0, left: 0, margin: 5, zIndex: 2 }} />}
             {this.props.metric.features.hockeystick?.decreasing && <MetricIcon name="hockeystickDecreasing" size={14} theme="primary" style={{ position: 'absolute', bottom: 0, left: 0, margin: 5, zIndex: 2 }} />}
 
-            <DistributionIndicator metric={this.props.metric} style={{position: 'absolute', bottom: 5, right: 10}} />
+            <DistributionIndicator metric={this.props.metric} style={{ position: 'absolute', bottom: 20, right: 60 }} />
         </div>;
     }
 }

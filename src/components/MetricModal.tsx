@@ -7,6 +7,7 @@ import MetricImage from 'types/MetricImage';
 import update from 'immutability-helper';
 import { v4 as uuid } from 'uuid';
 import MetricIcon from './MetricIcon';
+import DistributionIndicator from './DistributionIndicator';
 
 interface Props {
     isOpen: boolean
@@ -40,7 +41,8 @@ export default class MetricModal extends Component<Props, State> {
 
     ref: React.RefObject<HTMLDivElement>;
     tagFilterTimeout: NodeJS.Timeout | null;
-    tagControllerKey: string
+    tagControllerKey: string;
+    tagFilterRef: React.RefObject<HTMLInputElement>;
 
     constructor(props: Props) {
         super(props);
@@ -50,6 +52,7 @@ export default class MetricModal extends Component<Props, State> {
         this.ref = React.createRef();
         this.tagFilterTimeout = null;
         this.tagControllerKey = "tagId-controllerKey-" + uuid();
+        this.tagFilterRef = React.createRef();
     }
 
     buildTagGrid = (tags: MetricImage["tags"]): { dataFrameBuild: TagDataFrame, activeTags: string[] } => {
@@ -141,23 +144,51 @@ export default class MetricModal extends Component<Props, State> {
 
         return <GrafanaUI.Modal isOpen={this.props.isOpen} title="Metric Details" onDismiss={this.props.onDismiss} >
             <div ref={this.ref} style={{ display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: "100%", }} >
-                <div style={{ display: 'flex', flex: 1, flexDirection: 'row', position: 'absolute', top: 100, left: 20 }} >
-                    {this.props.image.features.increasing && <div style={{ display: 'flex', flex: 1, flexDirection: 'row', alignItems: 'center' }} ><MetricIcon name="trendingUp" size={14} theme="secondary" />&nbsp;&nbsp;Increasing</div>}
-                    {this.props.image.features.decreasing && <div style={{ display: 'flex', flex: 1, flexDirection: 'row', alignItems: 'center' }} ><MetricIcon name="trendingDown" size={14} theme="primary" />&nbsp;&nbsp;Decreasing</div>}
-                    {this.props.image.features.hockeystick?.increasing && <div style={{ display: 'flex', flex: 1, flexDirection: 'row', alignItems: 'center' }} ><MetricIcon name="hockeystickIncreasing" size={14} theme="secondary" />&nbsp;&nbsp;Increasing</div>}
-                    {this.props.image.features.hockeystick?.decreasing && <div style={{ display: 'flex', flex: 1, flexDirection: 'row', alignItems: 'center' }} ><MetricIcon name="hockeystickDecreasing" size={14} theme="primary" />&nbsp;&nbsp;Decreasing</div>}
-                    
+                
+
+                <div style={{ display: 'flex', flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly' }} >
+                    <div style={{ display: 'flex', flex: 1, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', height: 400, minWidth: 100, overflow: 'scroll' }} >
+                        {this.props.image.features.increasing && <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} ><MetricIcon name="trendingUp" size={14} theme="secondary" />&nbsp;&nbsp;Increasing</div>}
+                        {this.props.image.features.decreasing && <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} ><MetricIcon name="trendingDown" size={14} theme="primary" />&nbsp;&nbsp;Decreasing</div>}
+                        {this.props.image.features.hockeystick?.increasing && <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} ><MetricIcon name="hockeystickIncreasing" size={14} theme="secondary" />&nbsp;&nbsp;Increasing</div>}
+                        {this.props.image.features.hockeystick?.decreasing && <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} ><MetricIcon name="hockeystickDecreasing" size={14} theme="primary" />&nbsp;&nbsp;Decreasing</div>}
+                        
+                    </div>
+
+                    <div style={{ width: 10 }} />
+
+                    {!this.props.figure && <img src={this.props.image?.img} style={{ width: 400, height: 400, borderRadius: 10, opacity: 0.2 }} />}
+
+                    {!this.props.figure && <div style={{ position: 'absolute' }} >
+                        <GrafanaUI.LoadingPlaceholder  />
+                    </div>}
+
+                    {this.props.figure && <div style={{ borderRadius: 10 }} ><PlotlyAbstractionController data={this.props.figure.data} layout={this.props.figure.layout} activeTags={activeTags} style={{ width: 400, height: 400, borderRadius: 10 }} /></div>}
+
+                    <div style={{ width: 10 }} />
+
+                    <div style={{ display: 'flex', flex: 1, flexDirection: 'column', height: 400, minWidth: 100, overflow: 'scroll', alignItems: 'flex-start', justifyContent: 'flex-start' }} >
+                        {this.props.image.features?.distribution && Object.keys(this.props.image.features.distribution).map(tagId => {
+                            if (!this.props.image?.features) return null;
+
+                            let setTag = () => {
+                                if (this.tagFilterRef.current) {
+                                    let v = `"${tagId}`;
+                                    this.tagFilterRef.current.value = v;
+                                    this.setState(update(this.state, { tagFilter: {$set: v} }));
+                                }
+                            }
+
+                            return <div style={{ display: 'flex', flexDirection: 'row', cursor: 'pointer' }} ><p style={{ marginRight: 5 }} onClick={setTag} >Tag {tagId}:</p> <DistributionIndicator style={{ position: 'relative' }} individual={this.props.image.features.distribution?.[tagId]} onClick={setTag} /></div>
+                        })}
+                    </div>
+
                 </div>
 
-                {!this.props.figure && <img src={this.props.image?.img} style={{ width: 400, height: 400, borderRadius: 10, opacity: 0.2 }} />}
-                {!this.props.figure && <div style={{ position: 'absolute' }} >
-                    <GrafanaUI.LoadingPlaceholder  />
-                </div>}
-                {this.props.figure && <div style={{ borderRadius: 10 }} ><PlotlyAbstractionController data={this.props.figure.data} layout={this.props.figure.layout} activeTags={activeTags} style={{ width: 400, height: 400, borderRadius: 10 }} /></div>}
                 <div style={{ alignSelf: 'flex-start' }} >
                     <div style={{ height: 10 }} />
                     <h2>Tags</h2>
-                    <GrafanaUI.Input prefix={<GrafanaUI.Icon name="search" />} placeholder="Search tags (regex)" onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    <GrafanaUI.Input ref={this.tagFilterRef} prefix={<GrafanaUI.Icon name="search" />} placeholder="Search tags (regex)" onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 
                         let v = e.target.value;
                         this.tagFilterTimeout && clearTimeout(this.tagFilterTimeout);
