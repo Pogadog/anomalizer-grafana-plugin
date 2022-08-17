@@ -12,6 +12,7 @@ import MetricImage from 'types/MetricImage';
 import '../styles/root.css';
 import MetricModal from './MetricModal';
 import Reshade from './Reshade';
+import Fetch from './Fetch';
 
 type MetricFigureLayout = MetricFigure["layout"];
 
@@ -147,7 +148,7 @@ export default class Main extends Component<Props, State> {
                 }
             }} }), async () => {
                 
-                await fetch(this.props.options.endpoint + '/filter', { 
+                await Fetch(this.props.options.endpoint + '/filter', { 
                     method: 'POST',
                     headers: {
                         'Accept-Type': 'application/json',
@@ -171,7 +172,7 @@ export default class Main extends Component<Props, State> {
 
         this.clock.addTask(this.clockKeys.metricFetch, async () => {
 
-            let r = await fetch(this.props.options.endpoint + '/images');
+            let r = await Fetch(this.props.options.endpoint + '/images');
             let images = await r.json();
 
             this.setState(update(this.state, { logoPopAnimation: {$set: this.state.ready ? "start" : "stop"} }), () => {
@@ -234,7 +235,7 @@ export default class Main extends Component<Props, State> {
     }
 
     updateShowMetricFigure = async () => {
-        let r = await fetch(this.props.options.endpoint + '/figure/' + this.state.showMetric);
+        let r = await Fetch(this.props.options.endpoint + '/figure/' + this.state.showMetric);
         let figure = await r.json();
 
         figure.layout = this.reshadeMetricLayout(figure.layout);
