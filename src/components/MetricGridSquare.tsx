@@ -22,6 +22,8 @@ export default class MetricGridSquare extends Component<Props, State> {
             <img src={this.props.metric.img} style={{ position: 'absolute', width: "100%", height: "100%", borderRadius: 10, zIndex: 1 }} />
             {this.props.metric.features.increasing && <MetricIcon name="trendingUp" size={14} theme="secondary" style={{ position: 'absolute', bottom: 0, left: 0, margin: 5, zIndex: 2 }} />}
             {this.props.metric.features.decreasing && <MetricIcon name="trendingDown" size={14} theme="primary" style={{ position: 'absolute', bottom: 0, left: 0, margin: 5, zIndex: 2 }} />}
+            {this.props.metric.features.hockeystick?.increasing && <MetricIcon name="hockeystickIncreasing" size={14} theme="secondary" style={{ position: 'absolute', bottom: 0, left: 0, margin: 5, zIndex: 2 }} />}
+            {this.props.metric.features.hockeystick?.decreasing && <MetricIcon name="hockeystickDecreasing" size={14} theme="primary" style={{ position: 'absolute', bottom: 0, left: 0, margin: 5, zIndex: 2 }} />}
         </div>;
     }
 }

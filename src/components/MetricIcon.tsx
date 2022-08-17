@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Theme from 'values/Theme';
 
-type IconNames =  "trendingUp" | "trendingDown";
+type IconNames =  "trendingUp" | "trendingDown" | "hockeystickIncreasing" | "hockeystickDecreasing";
 
 interface IconImports {
     default: {
@@ -15,13 +15,21 @@ interface IconImports {
 const Icons: IconImports = {
     default: {
         trendingUp: {
-            primary: require("../img/trendingUp.primary.svg"),
-            secondary: require("../img/trendingUp.secondary.svg")
+            primary: require("../img/icons/trendingUp.primary.svg"),
+            secondary: require("../img/icons/trendingUp.secondary.svg")
         },
         trendingDown: {
-            primary: require("../img/trendingDown.primary.svg"),
-            secondary: require("../img/trendingDown.secondary.svg")
+            primary: require("../img/icons/trendingDown.primary.svg"),
+            secondary: require("../img/icons/trendingDown.secondary.svg")
         },
+        hockeystickIncreasing: {
+            primary: require("../img/icons/hockeystickIncreasing.primary.svg"),
+            secondary: require("../img/icons/hockeystickIncreasing.secondary.svg")
+        },
+        hockeystickDecreasing: {
+            primary: require("../img/icons/hockeystickDecreasing.primary.svg"),
+            secondary: require("../img/icons/hockeystickDecreasing.secondary.svg")
+        }
     }
     
 }
