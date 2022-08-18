@@ -178,11 +178,11 @@ export default class Main extends Component<Props, State> {
             this.setState(update(this.state, { logoPopAnimation: {$set: this.state.ready ? "start" : "stop"} }), () => {
                 setTimeout(() => {
                     this.setState(update(this.state, { ready: {$set: true}, images: {$set: images}}), () => {
-                        this.renderImages();
-                        setTimeout(() => {
-                            this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate }, logoPopAnimation: {$set: "start"} }));
-                        }, 0);
-        
+                        this.renderImages(() => {
+                            setTimeout(() => {
+                                this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate }, logoPopAnimation: {$set: "start"} }));
+                            }, 100);
+                        });
                     })
                 }, this.state.ready ? 0 : 100);
             })
@@ -263,7 +263,7 @@ export default class Main extends Component<Props, State> {
         return this.reshade.metricImage(img);
     }
 
-    renderImages = () => {
+    renderImages = (callback?: () => void) => {
 
         let images = {...this.state.images};
 
@@ -347,7 +347,7 @@ export default class Main extends Component<Props, State> {
         }
 
 
-        this.setState(update(this.state, { renderedImages: {$set: [...sortedMetrics.critical, ...sortedMetrics.warning, ...sortedMetrics.normal]} }));
+        this.setState(update(this.state, { renderedImages: {$set: [...sortedMetrics.critical, ...sortedMetrics.warning, ...sortedMetrics.normal]} }), callback);
     }
 
     render = () => {
