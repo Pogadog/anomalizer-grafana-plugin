@@ -1,44 +1,44 @@
-# Grafana Panel Plugin Template
+# Anomalizer Grafana Plugin by Pogadog
 
-[![Build](https://github.com/grafana/grafana-starter-panel/workflows/CI/badge.svg)](https://github.com/grafana/grafana-starter-panel/actions?query=workflow%3A%22CI%22)
+This is the Grafana plugin for the Anomalizer, which provides Prometheus anomaly visualization. It's based upon the [original React-Native UI](https://github.com/pogadog/anomalizer-ui), written in React Typescript with the Grafana plugin infastructure.
 
-This template is a starting point for building Grafana Panel Plugins in Grafana 7.0+
+> With its grid-based design and similar metrics feature, the Anomalizer UI aims to create the perfect balance of computer intelligence and the human eye to help find anomalies within your system.
 
-## What is Grafana Panel Plugin?
+> With split-pane views, actionable features, and quick filter mechanisms, the Anomalizer UI helps you find metrics that are important, faster.
 
-Panels are the building blocks of Grafana. They allow you to visualize data in different ways. While Grafana has several types of panels already built-in, you can also build your own panel, to add support for other visualizations.
+> The Anomalizer UI follows the Airbus [*dark cockpit*](https://www.icao.int/ESAF/Documents/meetings/2017/AFI%20FOSAS%202017/Day%201%20Docs/Day_1_2_Airbuspihlo.pdf) aircraft design philosophy with its presentation of metrics by visually highlighting metrics you need to know about on its main page, allowing you to identify anomalies in your system within a fraction of a second.
 
-For more information about panels, refer to the documentation on [Panels](https://grafana.com/docs/grafana/latest/features/panels/panels/)
+This plugin is in active development. It's constantly being improved upon, gradually implementing features from the original UI.
 
-## Getting started
+# Co-dependents
 
-1. Install dependencies
+This project is not standalone; it requires the Anomalizer server, which can be boostrapped through its Github project [here](https://github.com/pogadog/anomalizer), or accessed in a production environment [here](https://anomalizer.app) on the web.
 
-   ```bash
-   yarn install
-   ```
+The Anomalizer server `docker-compose` method contains a Docker image of this project, so you shouldn't need to install this project separately to run it. However, development instructions are below.
 
-2. Build plugin in development mode or run in watch mode
+# Development
 
-   ```bash
-   yarn dev
-   ```
+### Libraries Needed
+- Node : >=16
+- Npm : latest (should come with Node)
+- Docker
 
-   or
+### Install the project
+- Clone
+- `cd anomalizer-grafana-plugin`
+- `npm install`
+- `npm start`
 
-   ```bash
-   yarn watch
-   ```
+### Start Docker
+- `docker run -d -p 3000:3000 -v "$(pwd)"/dist:/var/lib/grafana/plugins --name=grafana grafana/grafana:7.0.0`
+- This will start a Grafana instance locally, along with mapping the build directory of the plugin to the Grafana plugin resource folder
 
-3. Build plugin in production mode
+### Build a panel
+- The Grafana UI should be running on `localhost:3000`
+- Go to [`http://localhost:3000/dashboards/new`](`http://localhost:3000/dashboards/new`) (or use an existing Dashboard)
+- Click `Add new panel`
+- Under the `Visualization` dropdown in the right-hand column, click `Anomalizer`
+- Click `Apply` (or `Save` to persist your changes)
 
-   ```bash
-   yarn build
-   ```
-
-## Learn more
-
-- [Build a panel plugin tutorial](https://grafana.com/tutorials/build-a-panel-plugin)
-- [Grafana documentation](https://grafana.com/docs/)
-- [Grafana Tutorials](https://grafana.com/tutorials/) - Grafana Tutorials are step-by-step guides that help you make the most of Grafana
-- [Grafana UI Library](https://developers.grafana.com/ui) - UI components to help you build interfaces using Grafana Design System
+### You should now have a working panel of the Anomalizer plugin!
+> The plugin automatically connects to `https://engine.anomalizer.app`, the on-demand Anomalizer demo backend in the cloud. It may take a few minutes for the metrics to show up. This is a shared instance, so cloud metric filters may be inconsistent.
