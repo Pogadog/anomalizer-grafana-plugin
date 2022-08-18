@@ -56,7 +56,8 @@ interface State {
     loadingBarPinAlternate: boolean,
     logoPopAnimation: "stop" | "start",
     filters: Filters,
-    metricsRefreshKey: number
+    metricsRefreshKey: number,
+    showLoading: boolean
 }
 export default class Main extends Component<Props, State> {
 
@@ -107,7 +108,8 @@ export default class Main extends Component<Props, State> {
                         invert: 'match'
                     }
                 }
-            }
+            },
+            showLoading: false
 
         }
         this.clock = new Clock();
@@ -172,10 +174,16 @@ export default class Main extends Component<Props, State> {
 
         this.clock.addTask(this.clockKeys.metricFetch, async () => {
 
+            let timeout = setTimeout(() => {
+                this.setState(update(this.state, { showLoading: {$set: true} }));
+            }, 3000);
+
             let r = await Fetch(this.props.options.endpoint + '/images');
             let images = await r.json();
 
-            this.setState(update(this.state, { logoPopAnimation: {$set: this.state.ready ? "start" : "stop"} }), () => {
+            clearTimeout(timeout);
+
+            this.setState(update(this.state, { logoPopAnimation: {$set: this.state.ready ? "start" : "stop"}, showLoading: {$set: false} }), () => {
                 setTimeout(() => {
                     this.setState(update(this.state, { ready: {$set: true}, images: {$set: images}}), () => {
                         this.renderImages(() => {
@@ -358,10 +366,13 @@ export default class Main extends Component<Props, State> {
             {theme => {
 
                 if (!this.state.ready) return <div style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: "100%", width: "100%" }} >
+                    <span style={{ height: 80 }} />
                     <img className="logo-pop" src={logo} data-animation={this.state.logoPopAnimation} />
+                    <div style={{ height: 70, alignItems: 'center', marginTop: 10, opacity: this.state.showLoading ? 1 : 0 }} ><GrafanaUI.LoadingPlaceholder /></div>
                 </div>
         
                 return <div className="main-grid-load" style={{ overflow: 'scroll', width: "100%", height: "100%" }} data-animation={this.state.logoPopAnimation} >
+                    
                     
                     <div style={{ height: 2, marginBottom: 10, borderRadius: 90, backgroundColor: this.state.loadingBarPinAlternate ? Theme.colors.palette.secondary : Theme.colors.palette.primary, marginLeft: this.state.loadingBarPinAlternate ? undefined : 'auto', marginRight: this.state.loadingBarPinAlternate ? undefined : 0, transitionDuration: `${(this.refreshInterval() / 1000) - .5}s` }} className="loading-bar" data-state={this.state.loadingBarPinAlternate ? "collapsed" : null} data-refresh-interval={this.refreshInterval()} />
 
