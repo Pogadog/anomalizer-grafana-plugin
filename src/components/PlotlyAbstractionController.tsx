@@ -8,9 +8,9 @@ interface PlotlyGraphDiv {
 }
 
 interface Props {
-    data: {
+    data: Array<{
         [key: string]: any
-    }[];
+    }>;
     style: React.CSSProperties;
     layout: Object;
     activeTags: string[]
@@ -32,7 +32,7 @@ export default class PlotlyAbstractionController extends Component<Props, State>
     renderPlot = () => {
         let data = this.props.data;
 
-        let visibilityDeclaredData: { [key: string]: any }[] = [];
+        let visibilityDeclaredData: Array<{ [key: string]: any }> = [];
 
         for (let trace of data) {
             trace.visible = this.props.activeTags.includes(trace.name) ? true : "legendonly";

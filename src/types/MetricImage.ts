@@ -33,8 +33,8 @@ export default interface MetricImage {
         [key: string]: number
     }
     status: "normal" | "warning" | "critical"
-    tags: {
+    tags: Array<{
         [key: string]: string
-    }[]
+    }>
     type: string
 }

@@ -9,7 +9,6 @@ export default class Clock {
 
     constructor() {
         this.tasks = {}
-        setInterval
     }
 
     addTask = (id: string, event: () => void, interval: number) => {

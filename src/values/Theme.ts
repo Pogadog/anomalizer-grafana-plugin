@@ -12,4 +12,4 @@ export default {
             primaryWithoutHash: '008000'
         }
     }
-};
+}

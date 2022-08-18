@@ -365,11 +365,13 @@ export default class Main extends Component<Props, State> {
         return <GrafanaUI.ThemeContext.Consumer>
             {theme => {
 
-                if (!this.state.ready) return <div style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: "100%", width: "100%" }} >
-                    <span style={{ height: 80 }} />
-                    <img className="logo-pop" src={logo} data-animation={this.state.logoPopAnimation} />
-                    <div style={{ height: 70, alignItems: 'center', marginTop: 10, opacity: this.state.showLoading ? 1 : 0 }} ><GrafanaUI.LoadingPlaceholder /></div>
-                </div>
+                if (!this.state.ready) {
+                    return <div style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: "100%", width: "100%" }} >
+                        <span style={{ height: 80 }} />
+                        <img className="logo-pop" src={logo} data-animation={this.state.logoPopAnimation} />
+                        <div style={{ height: 70, alignItems: 'center', marginTop: 10, opacity: this.state.showLoading ? 1 : 0 }} ><GrafanaUI.LoadingPlaceholder /></div>
+                    </div>
+                }
         
                 return <div className="main-grid-load" style={{ overflow: 'scroll', width: "100%", height: "100%" }} data-animation={this.state.logoPopAnimation} >
                     
@@ -380,11 +382,13 @@ export default class Main extends Component<Props, State> {
 
                     {this.state.renderedImages.map((metric, i) => {
                         
-                        if (metric.plot !== this.props.options.metricType) return null;
+                        if (metric.plot !== this.props.options.metricType) {
+                            return null;
+                        }
 
                         metric.img = this.reshadeMetricImage(metric.img);
 
-                        return <MetricGridSquare metric={metric} onClick={() => {
+                        return <MetricGridSquare key={metric.id} metric={metric} onClick={() => {
                             this.setState(update(this.state, { activeMetric: {$set: metric.id} }), () => {
                                 this.showMetric();
                             })

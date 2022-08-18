@@ -7,6 +7,9 @@ yarn-error.log*
 
 node_modules/
 
+# API Keys
+publisherApiKey
+
 # Runtime data
 pids
 *.pid

@@ -33,7 +33,9 @@ export default class Reshade {
 
         layout.paper_bgcolor = "#222222"
         layout.plot_bgcolor = "#222222"
-        if (!layout.font) layout.font = {}
+        if (!layout.font) {
+            layout.font = {}
+        }
         layout.font.color = "white"
         return layout;
     }

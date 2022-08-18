@@ -22,11 +22,11 @@ interface State {
 
 interface TagDataFrame {
     name: string;
-    fields: {
+    fields: Array<{
         name: string;
         type: FieldType;
         values: any[]
-    }[]
+    }>
 }
 
 interface TagGridMap {
@@ -102,8 +102,12 @@ export default class MetricModal extends Component<Props, State> {
 
         for (let tag of tags) {
             for (let point in tag) {
-                if (point === this.tagControllerKey) continue;
-                if (!tagGridMap[point]) tagGridMap[point] = [];
+                if (point === this.tagControllerKey) {
+                    continue;
+                }
+                if (!tagGridMap[point]) {
+                    tagGridMap[point] = [];
+                }
                 tagGridMap[point].push(String(tag[point]))
             }
         }
@@ -136,7 +140,9 @@ export default class MetricModal extends Component<Props, State> {
 
     render = () => {
 
-        if (!this.props.figure || !this.props.image) return null;
+        if (!this.props.figure || !this.props.image) {
+            return null;
+        }
 
         let { dataFrameBuild: tags, activeTags } = this.buildTagGrid(this.props.image.tags);
 
@@ -169,7 +175,9 @@ export default class MetricModal extends Component<Props, State> {
 
                     <div style={{ display: 'flex', flex: 1, flexDirection: 'column', height: 400, minWidth: 100, overflow: 'scroll', alignItems: 'flex-start', justifyContent: 'flex-start' }} >
                         {this.props.image.features?.distribution && Object.keys(this.props.image.features.distribution).map(tagId => {
-                            if (!this.props.image?.features) return null;
+                            if (!this.props.image?.features) {
+                                return null;
+                            }
 
                             let setTag = () => {
                                 if (this.tagFilterRef.current) {
@@ -179,7 +187,7 @@ export default class MetricModal extends Component<Props, State> {
                                 }
                             }
 
-                            return <div style={{ display: 'flex', flexDirection: 'row', cursor: 'pointer' }} ><p style={{ marginRight: 5 }} onClick={setTag} >Tag {tagId}:</p> <DistributionIndicator style={{ position: 'relative' }} individual={this.props.image.features.distribution?.[tagId]} onClick={setTag} /></div>
+                            return <div key={tagId} style={{ display: 'flex', flexDirection: 'row', cursor: 'pointer' }} ><p style={{ marginRight: 5 }} onClick={setTag} >Tag {tagId}:</p> <DistributionIndicator style={{ position: 'relative' }} individual={this.props.image.features.distribution?.[tagId]} onClick={setTag} /></div>
                         })}
                     </div>
 
