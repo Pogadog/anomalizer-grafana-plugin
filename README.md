@@ -1,6 +1,7 @@
 # Anomalizer Grafana Plugin by Pogadog
 
-[![Build](https://github.com/pogadog/anomalizer-grafana-plugin/workflows/CI/badge.svg)](https://github.com/pogadog/anomalizer-grafana-plugin/actions?query=workflow%3A%22CI%22)
+![GitHub](https://img.shields.io/github/license/pogadog/anomalizer-grafana-plugin) [![Build](https://github.com/pogadog/anomalizer-grafana-plugin/workflows/CI/badge.svg)](https://github.com/pogadog/anomalizer-grafana-plugin/actions?query=workflow%3A%22CI%22)
+
 
 This is the Grafana plugin for the Anomalizer, which provides Prometheus anomaly visualization. It's based upon the [original React-Native UI](https://github.com/pogadog/anomalizer-ui), written in React Typescript with the Grafana plugin infastructure.
 
