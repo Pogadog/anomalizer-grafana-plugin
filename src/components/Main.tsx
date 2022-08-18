@@ -385,7 +385,7 @@ export default class Main extends Component<Props, State> {
                         <GrafanaUI.Icon name="question-circle" size="xxl" style={{ color: 'gray' }} />
                         <div style={{ height: 10 }} />
                         <h2>No metrics to display</h2>
-                        {this.props.options.primaryUIFilter || this.props.options.secondaryUIFilter || this.props.options.secondaryUIFilter || this.props.options.secondaryServerFilter ? <p>There are no matrics that match the current filter(s)</p> : <p>There are no metrics to display</p>}
+                        {this.props.options.primaryUIFilter || this.props.options.secondaryUIFilter || this.props.options.secondaryUIFilter || this.props.options.secondaryServerFilter ? <p>There are no metrics that match the current filter(s)</p> : <p>There are no metrics to display</p>}
                     </div>}
 
                     
