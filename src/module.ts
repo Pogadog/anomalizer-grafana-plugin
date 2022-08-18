@@ -1,8 +1,8 @@
 import { PanelPlugin } from '@grafana/data';
-import { Options } from './types';
+import OptionsTypes from './types/Options';
 import { Panel } from './Panel';
 
-export const plugin = new PanelPlugin<Options>(Panel).setPanelOptions(builder => {
+export const plugin = new PanelPlugin<OptionsTypes>(Panel).setPanelOptions(builder => {
   return builder
     .addTextInput({
       path: 'endpoint',

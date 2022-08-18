@@ -1,6 +1,6 @@
 type SeriesSize = 'sm' | 'md' | 'lg';
 
-export interface Options {
+export default interface OptionsTypes {
   endpoint: string;
   showSeriesCount: boolean;
   seriesCountSize: SeriesSize;

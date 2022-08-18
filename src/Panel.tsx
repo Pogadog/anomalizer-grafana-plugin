@@ -1,10 +1,9 @@
 import React from 'react';
 import { PanelProps } from '@grafana/data';
-import { Options } from 'types';
+import OptionsTypes from 'types/Options';
 import Main from './components/Main';
-//import { css, cx } from 'emotion';
 
-export const Panel: React.FC<PanelProps<Options>> = props => {
+export const Panel: React.FC<PanelProps<OptionsTypes>> = props => {
   return <Main {...props} />;
 };
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { PanelProps } from '@grafana/data';
-import { Options } from 'types';
+import OptionsTypes from 'types/Options';
 import * as GrafanaUI from '@grafana/ui';
 import update from 'immutability-helper';
 import Clock from './Clock';
@@ -41,7 +41,7 @@ interface Filters {
     }
 }
 
-interface Props extends PanelProps<Options> {};
+interface Props extends PanelProps<OptionsTypes> {};
 interface State {
     showModal: boolean,
     ready: boolean,
