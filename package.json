@@ -1,13 +1,13 @@
 {
   "name": "pogadog-anomalizer",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "scripts": {
     "build": "grafana-toolkit plugin:build",
     "test": "grafana-toolkit plugin:test",
     "dev": "grafana-toolkit plugin:dev && cp -r dist grafana-plugins/dist",
     "watch": "grafana-toolkit plugin:dev --watch",
-    "sign": "grafana-toolkit plugin:sign",
+    "sign": "grafana-toolkit plugin:sign --rootUrls http://localhost:3000",
     "start": "npm run watch"
   },
   "author": "Pogadog, LLC",
