@@ -14,7 +14,7 @@ This plugin is in active development. It's constantly being improved upon, gradu
 
 This project is not standalone; it requires the Anomalizer server, which can be boostrapped through its Github project [here](https://github.com/pogadog/anomalizer), or accessed in a production environment [here](https://anomalizer.app) on the web.
 
-The Anomalizer server `docker-compose` method contains a Docker image of this project, so you shouldn't need to install this project separately to run it. However, development instructions are below.
+This plugin connects to the instance via url eg. `https://engine.anomalizer.app`, `http://localhost:8056`.
 
 # Development
 
