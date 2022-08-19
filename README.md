@@ -19,6 +19,26 @@ This project is not standalone; it requires the Anomalizer server, which can be 
 
 This plugin connects to the instance via url eg. `https://engine.anomalizer.app`, `http://localhost:8056`.
 
+# Getting Started (Alpha Release)
+
+>The following instructions are for the Alpha release of the Anomalizer Grafana Plugin. The steps for getting started will be *much* easier when it's published to the Grafana Marketplace soon.
+
+### Requirements
+- Docker
+
+### Start Grafana
+- Download the latest release of the Anomalizer Grafana Plugin. You should now have a zip file called `pogadog-anomalizer-panel-0.0.x.zip` in your `Downloads` folder
+- Extract the zip folder. There should now be a folder called `pogadog-anomalizer-panel` in your `Downloads` folder
+- *[MacOS and Linux]* Open up a terminal, and `cd` into your `Downloads` folder. Run the following command inside your `Downloads` folder: 
+    - `docker run -d -p 3000:3000 -v "$(pwd)"/pogadog-anomalizer-panel:/var/lib/grafana/plugins --name=grafana-anomalizer grafana/grafana:7.0.0`
+- Open up your Grafana Dashboards on [http://localhost:3000/dashboard/new](`http://localhost:3000/dashboard/new`)
+- Login with username `admin` and password `admin`, and skip resetting your password
+- Click `Add new panel`
+- Under the `Visualization` dropdown in the right-hand column, click `Anomalizer`
+- Click `Apply` (or `Save` to persist your changes)
+
+### You should now have a working panel of the Anomalizer plugin!
+> The plugin automatically connects to `https://engine.anomalizer.app`, the on-demand Anomalizer demo backend in the cloud. It may take a few minutes for the metrics to show up. This is a shared instance, so cloud metric filters may be inconsistent.
 # Development
 
 ### Libraries Needed
@@ -34,14 +54,4 @@ This plugin connects to the instance via url eg. `https://engine.anomalizer.app`
 
 ### Start Docker
 - `docker run -d -p 3000:3000 -v "$(pwd)"/dist:/var/lib/grafana/plugins --name=grafana grafana/grafana:7.0.0`
-- This will start a Grafana instance locally, along with mapping the build directory of the plugin to the Grafana plugin resource folder
-
-### Build a panel
-- The Grafana UI should be running on `localhost:3000`
-- Go to [`http://localhost:3000/dashboards/new`](`http://localhost:3000/dashboards/new`) (or use an existing Dashboard)
-- Click `Add new panel`
-- Under the `Visualization` dropdown in the right-hand column, click `Anomalizer`
-- Click `Apply` (or `Save` to persist your changes)
-
-### You should now have a working panel of the Anomalizer plugin!
-> The plugin automatically connects to `https://engine.anomalizer.app`, the on-demand Anomalizer demo backend in the cloud. It may take a few minutes for the metrics to show up. This is a shared instance, so cloud metric filters may be inconsistent.
+- Follow the instructions from `Getting Started - Build the Panel` to initialize the panels
