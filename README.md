@@ -4,7 +4,7 @@
 
 ![The Anomalizer as a Grafana panel](media/screenshot0.png "The Anomalizer as a Grafana panel")
 
-This is the Grafana plugin for the Anomalizer, which provides Prometheus anomaly visualization. It's based upon the [original React-Native UI](https://github.com/pogadog/anomalizer-ui), written in React Typescript with the Grafana plugin infastructure.
+This is the Grafana plugin for the Anomalizer, which provides Prometheus anomaly visualization. Written in React Typescript with the Grafana plugin infastructure, it's based upon the [original React-Native UI](https://github.com/pogadog/anomalizer-ui).
 
 > With its grid-based design and similar metrics feature, the Anomalizer UI aims to create the perfect balance of computer intelligence and the human eye to help find anomalies within your system.
 
