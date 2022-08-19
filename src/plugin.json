@@ -2,14 +2,14 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
   "name": "Anomalizer",
-  "id": "pogadog-anomalizer",
+  "id": "pogadog-anomalizer-panel",
   "info": {
     "description": "",
     "author": {
       "name": "Pogadog, LLC",
       "url": "https://pogadog.com"
     },
-    "keywords": [],
+    "keywords": ["anomalizer", "pogadog", "anomaly", "visualization", "prometheus", "metrics"],
     "logos": {
       "small": "img/logo.svg",
       "large": "img/logo.svg"
