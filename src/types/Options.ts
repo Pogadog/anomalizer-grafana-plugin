@@ -4,7 +4,7 @@ export default interface OptionsTypes {
   endpoint: string;
   showSeriesCount: boolean;
   seriesCountSize: SeriesSize;
-  metricType: string;
+  metricType: "timeseries" | "scatter";
   refreshRate: string;
   primaryUIFilter: string;
   primaryUIFilterInvert: 'match' | 'notMatch';

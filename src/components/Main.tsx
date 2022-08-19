@@ -342,6 +342,13 @@ export default class Main extends Component<Props, State> {
         }
 
         for (let status in sortedMetrics) {
+
+            // timeseries or scatter
+            sortedMetrics[status] = sortedMetrics[status].filter(metric => {
+                return metric.plot === this.props.options.metricType;
+            })
+
+            // sort based on weight
             sortedMetrics[status] = sortedMetrics[status].sort((a, b) => {
                 if ( a.weight < b.weight ){
                     return 1;
@@ -381,10 +388,6 @@ export default class Main extends Component<Props, State> {
                     <MetricModal isOpen={this.state.showMetric !== null} onDismiss={this.hideMetric} figure={this.state.showMetricFigure} image={this.state.showMetricImage} />
 
                     {this.state.renderedImages.map((metric, i) => {
-                        
-                        if (metric.plot !== this.props.options.metricType) {
-                            return null;
-                        }
 
                         metric.img = this.reshadeMetricImage(metric.img);
 
