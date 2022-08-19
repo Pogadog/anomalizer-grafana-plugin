@@ -40,7 +40,7 @@ This plugin connects to the instance via url eg. `https://engine.anomalizer.app`
 - Click `Apply` (or `Save` to persist your changes)
 
 ### You should now have a working panel of the Anomalizer plugin!
-> The plugin automatically connects to `https://engine.anomalizer.app`, the on-demand Anomalizer demo backend in the cloud. It may take a few minutes for the metrics to show up. This is a shared instance, so cloud metric filters may be inconsistent.
+> The plugin automatically connects to `https://engine.anomalizer.app`, the on-demand Anomalizer demo backend in the cloud. It may take a moment for the metrics to show up. This is a shared instance, so cloud metric filters may be inconsistent.
 # Development
 
 ### Libraries Needed
