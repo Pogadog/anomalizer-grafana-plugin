@@ -33,7 +33,7 @@ This plugin connects to the instance via url eg. `https://engine.anomalizer.app`
     - `docker run -d -p 3000:3000 -v "$(pwd)"/pogadog-anomalizer-panel:/var/lib/grafana/plugins --name=grafana-anomalizer grafana/grafana:7.0.0`
 
 ### Build the Panel
-- Open up your Grafana Dashboards on [http://localhost:3000/dashboard/new](`http://localhost:3000/dashboard/new`)
+- Open up your Grafana Dashboards on [http://localhost:3000/dashboard/new](http://localhost:3000/dashboard/new)
 - Login with username `admin` and password `admin`, and skip resetting your password
 - Click `Add new panel`
 - Under the `Visualization` dropdown in the right-hand column, click `Anomalizer`
