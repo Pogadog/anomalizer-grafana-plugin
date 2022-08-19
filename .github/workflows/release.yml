@@ -116,13 +116,14 @@ jobs:
           md5sum ${{ steps.metadata.outputs.archive }} > ${{ steps.metadata.outputs.archive-checksum }}
           echo "::set-output name=checksum::$(cat ./${{ steps.metadata.outputs.archive-checksum }} | cut -d' ' -f1)"
 
-      - name: Lint plugin
-        run: |
-          git clone https://github.com/grafana/plugin-validator
-          pushd ./plugin-validator/pkg/cmd/plugincheck2
-          go install
-          popd
-          plugincheck2 -config ./plugin-validator/config/private-plugin.yaml ${{ steps.metadata.outputs.archive }}
+# TODO: Reimpl when publishing to marketplace
+#      - name: Lint plugin
+#        run: |
+#          git clone https://github.com/grafana/plugin-validator
+#          pushd ./plugin-validator/pkg/cmd/plugincheck2
+#          go install
+#          popd
+#          plugincheck2 ${{ steps.metadata.outputs.archive }}
 
       - name: Create release
         id: create_release
