@@ -28,7 +28,7 @@ This plugin connects to the instance via url eg. `https://engine.anomalizer.app`
 - Docker
 
 ### Start Grafana
-- Download the latest release of the Anomalizer Grafana Plugin. You should now have a zip file called `pogadog-anomalizer-panel-0.0.x.zip` in your `Downloads` folder
+- Download the latest release of the Anomalizer Grafana Plugin. You should now have a zip file called `pogadog-anomalizer-panel-0.0.x.zip` in your `Downloads` folder from here: https://github.com/Pogadog/anomalizer-grafana-plugin/releases
 - Extract the zip folder. There should now be a folder called `pogadog-anomalizer-panel` in your `Downloads` folder
 - *[MacOS and Linux]* Open up a terminal, and `cd` into your `Downloads` folder. Run the following command inside your `Downloads` folder: 
     - `docker run -d -p 3000:3000 -v "$(pwd)"/pogadog-anomalizer-panel:/var/lib/grafana/plugins --name=grafana-anomalizer grafana/grafana:7.0.0`
