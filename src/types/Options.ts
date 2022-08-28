@@ -6,6 +6,7 @@ export default interface OptionsTypes {
   seriesCountSize: SeriesSize;
   metricType: "timeseries" | "scatter";
   refreshRate: string;
+  tagFilter: string;
   primaryUIFilter: string;
   primaryUIFilterInvert: 'match' | 'notMatch';
   primaryServerFilter: string;

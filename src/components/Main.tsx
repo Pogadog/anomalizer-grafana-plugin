@@ -161,6 +161,7 @@ export default class Main extends Component<Props, State> {
                         //query2: this.props.options.secondaryServerFilter,
                         invert: this.props.options.primaryServerFilterInvert === 'notMatch',
                         //invert2: this.props.options.secondaryServerFilterInvert === 'notMatch'
+                        server_tags: `{${this.props.options.tagFilter}}`
                     })
                 })
                 this.renderImages();
