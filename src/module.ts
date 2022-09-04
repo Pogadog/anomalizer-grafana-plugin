@@ -49,7 +49,7 @@ export const plugin = new PanelPlugin<OptionsTypes>(Panel).setPanelOptions(build
           { value: '300000', label: '5m' },
         ],
       },
-      defaultValue: '30000',
+      defaultValue: '10000',
     }).addTextInput({
       path: 'primaryUIFilter',
       name: 'Primary UI Filter',
