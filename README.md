@@ -56,5 +56,5 @@ This plugin connects to the instance via url eg. `https://engine.anomalizer.app`
 - `npm start`
 
 ### Start Docker
-- `docker run -d -p 3000:3000 -v "$(pwd)"/dist:/var/lib/grafana/plugins --name=grafana grafana/grafana:7.0.0`
+- `npm run docker-init`
 - Follow the instructions from `Getting Started - Build the Panel` to initialize the panels
