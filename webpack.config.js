@@ -7,6 +7,6 @@ module.exports = (config, options) => {
         type: 'asset',
     })
     let buildPath = fs.readFileSync("./buildPath.txt", 'utf-8');
-    config.output.path = path.resolve(__dirname,  buildPath + '/anomalizer-grafana-plugin');
+    config.output.path = path.resolve(buildPath + '/anomalizer-grafana-plugin');
     return config;
 }
