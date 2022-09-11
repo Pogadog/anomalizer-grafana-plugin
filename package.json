@@ -8,7 +8,8 @@
     "dev": "grafana-toolkit plugin:dev && cp -r dist grafana-plugins/dist",
     "watch": "grafana-toolkit plugin:dev --watch",
     "sign": "grafana-toolkit plugin:sign --rootUrls http://localhost:3000",
-    "start": "npm run watch"
+    "start": "npm run watch",
+    "docker-init": "docker run -d -p 3000:3000 -v $(cat grafanaPluginDirectory.txt):/var/lib/grafana/plugins --name=grafana-anomalizer grafana/grafana:7.0.0"
   },
   "author": "Pogadog, LLC",
   "license": "Apache-2.0",
