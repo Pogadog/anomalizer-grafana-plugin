@@ -57,7 +57,8 @@ interface State {
     logoPopAnimation: "stop" | "start",
     filters: Filters,
     metricsRefreshKey: number,
-    showLoading: boolean
+    showLoading: boolean,
+    datasourceDisconnect: boolean
 }
 export default class Main extends Component<Props, State> {
 
@@ -109,7 +110,8 @@ export default class Main extends Component<Props, State> {
                     }
                 }
             },
-            showLoading: false
+            showLoading: false,
+            datasourceDisconnect: false
 
         }
         this.clock = new Clock();
@@ -124,109 +126,32 @@ export default class Main extends Component<Props, State> {
         this.reshade = new Reshade();
     }
 
-    processIncomingFilters = async () => {
-        this.processIncomingFiltersTimeout && clearTimeout(this.processIncomingFiltersTimeout);
-        this.processIncomingFiltersTimeout = setTimeout(() => {
-            this.setState(update(this.state, { filters: {$set: {
-                primary: {
-                    UI: {
-                        filter: this.props.options.primaryUIFilter || '',
-                        invert: this.props.options.primaryUIFilterInvert
-                    },
-                    server: {
-                        filter: this.props.options.primaryServerFilter || '',
-                        invert: this.props.options.primaryServerFilterInvert
-                    }
-                },
-                secondary: {
-                    UI: {
-                        filter: this.props.options.secondaryUIFilter || '',
-                        invert: this.props.options.secondaryUIFilterInvert
-                    },
-                    server: {
-                        filter: this.props.options.secondaryServerFilter || '',
-                        invert: this.props.options.secondaryServerFilterInvert
-                    }
-                }
-            }} }), async () => {
-                
-                await Fetch(this.props.options.endpoint + '/filter', { 
-                    method: 'POST',
-                    headers: {
-                        'Accept-Type': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ 
-                        query: this.props.options.primaryServerFilter,
-                        //query2: this.props.options.secondaryServerFilter,
-                        invert: this.props.options.primaryServerFilterInvert === 'notMatch',
-                        //invert2: this.props.options.secondaryServerFilterInvert === 'notMatch'
-                    })
-                })
-                this.renderImages();
-            })
-        }, 500);
-    }
-
-    registerClocks = () => {
-        this.clock.removeTask(this.clockKeys.metricFetch);
-        this.clock.removeTask(this.clockKeys.cleanUpReshadeCache);
-
-        this.clock.addTask(this.clockKeys.metricFetch, async () => {
-
-            let timeout = setTimeout(() => {
-                this.setState(update(this.state, { showLoading: {$set: true} }));
-            }, 3000);
-
-            let r = await Fetch(this.props.options.endpoint + '/images');
-            let images = await r.json();
-
-            clearTimeout(timeout);
-
-            this.setState(update(this.state, { logoPopAnimation: {$set: this.state.ready ? "start" : "stop"}, showLoading: {$set: false} }), () => {
-                setTimeout(() => {
-                    this.setState(update(this.state, { ready: {$set: true}, images: {$set: images}}), () => {
-                        this.renderImages(() => {
-                            setTimeout(() => {
-                                this.setState(update(this.state, { loadingBarPinAlternate: {$set: !this.state.loadingBarPinAlternate }, logoPopAnimation: {$set: "start"} }));
-                            }, 100);
-                        });
-                    })
-                }, this.state.ready ? 0 : 100);
-            })
-            
-            
-            
-        }, this.refreshInterval());
-
-        this.clock.addTask(this.clockKeys.cleanUpReshadeCache, () => {
-            this.reshade.cleanUpCache(this.refreshInterval());
-        }, this.refreshInterval());
-    }
-
     componentDidMount = () => {
 
-        this.processIncomingFilters();
+        this.clock.addTask(this.clockKeys.cleanUpReshadeCache, () => {
+            this.reshade.cleanUpCache(60000);
+        }, 60000);
 
-        setTimeout(() => {
-            this.setState(update(this.state, { logoPopAnimation: {$set: "start"} }), () => {
-                setTimeout(() => {
-                    this.registerClocks();
-                }, 2000);
-            })
-        }, 100);
-        
-        
-        //this.setState(update(this.state, { loadingBarStateAttr: {$set: 'collapsed'} }));
+        this.processDatasource();
+    }
 
+    processDatasource = () => {
+
+        if (!this.props.data.series.length || this.props.data.series[0].name !== 'anomalizer') {
+            this.setState(update(this.state, { datasourceDisconnect: {$set: true} }));
+            return;
+        }
+
+        let metrics = this.props.data.series[0].fields[0].values.buffer[0] as {[key: string]: MetricImage}
+
+        this.setState(update(this.state, { images: {$set: metrics }, datasourceDisconnect: {$set: false}, ready: {$set: true}}), () => {
+            this.renderImages();
+        })
     }
 
     componentDidUpdate = (prevProps: Props) => {
         if (JSON.stringify(this.props.options) !== JSON.stringify(prevProps.options)) {
-            this.processIncomingFilters();
-        }
-        if (this.props.options.refreshRate !== prevProps.options.refreshRate) {
-            this.registerClocks();
+            this.processDatasource();
         }
     }
 
@@ -371,19 +296,8 @@ export default class Main extends Component<Props, State> {
 
         return <GrafanaUI.ThemeContext.Consumer>
             {theme => {
-
-                if (!this.state.ready) {
-                    return <div style={{ display: 'flex', flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: "100%", width: "100%" }} >
-                        <span style={{ height: 80 }} />
-                        <img className="logo-pop" src={logo} data-animation={this.state.logoPopAnimation} />
-                        <div style={{ height: 70, alignItems: 'center', marginTop: 10, opacity: this.state.showLoading ? 1 : 0 }} ><GrafanaUI.LoadingPlaceholder /></div>
-                    </div>
-                }
         
-                return <div className="main-grid-load" style={{ overflow: 'scroll', width: "100%", height: "100%" }} data-animation={this.state.logoPopAnimation} >
-                    
-                    
-                    <div style={{ height: 2, marginBottom: 10, borderRadius: 90, backgroundColor: this.state.loadingBarPinAlternate ? Theme.colors.palette.secondary : Theme.colors.palette.primary, marginLeft: this.state.loadingBarPinAlternate ? undefined : 'auto', marginRight: this.state.loadingBarPinAlternate ? undefined : 0, transitionDuration: `${(this.refreshInterval() / 1000) - .5}s` }} className="loading-bar" data-state={this.state.loadingBarPinAlternate ? "collapsed" : null} data-refresh-interval={this.refreshInterval()} />
+                return <div style={{ overflow: 'scroll', width: "100%", height: "100%" }} >
 
                     <MetricModal isOpen={this.state.showMetric !== null} onDismiss={this.hideMetric} figure={this.state.showMetricFigure} image={this.state.showMetricImage} />
 
@@ -399,14 +313,22 @@ export default class Main extends Component<Props, State> {
 
                     })}
 
-                    {this.state.renderedImages.length < 1 && <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} >
+                    {this.state.renderedImages.length < 1 && !this.state.datasourceDisconnect && <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} >
                         <GrafanaUI.Icon name="question-circle" size="xxl" style={{ color: 'gray' }} />
                         <div style={{ height: 10 }} />
                         <h2>No metrics to display</h2>
-                        {this.props.options.primaryUIFilter || this.props.options.secondaryUIFilter || this.props.options.secondaryUIFilter || this.props.options.secondaryServerFilter ? <p>There are no metrics that match the current filter(s)</p> : <p>There are no metrics to display</p>}
+                        {<p>No metrics are reported from the Datasource with this panel's query</p>}
                     </div>}
 
-                    
+                    {this.state.datasourceDisconnect && <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} >
+                        <GrafanaUI.Icon name="x" size="xxl" style={{ color: 'gray' }} />
+                        <div style={{ height: 10 }} />
+                        <h2>Datasource disconnected</h2>
+                        <div style={{ height: 10 }} />
+                        <p>This panel isn't connected to a Datasource</p>
+                        <p>Edit this panel to add a query from the Anomzlier Datasource</p>
+                    </div>}
+
                 </div>
             }}
         </GrafanaUI.ThemeContext.Consumer>
