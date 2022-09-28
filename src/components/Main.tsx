@@ -150,7 +150,8 @@ export default class Main extends Component<Props, State> {
     }
 
     componentDidUpdate = (prevProps: Props) => {
-        if (JSON.stringify(this.props.options) !== JSON.stringify(prevProps.options)) {
+
+        if (JSON.stringify(this.props.options) !== JSON.stringify(prevProps.options) || JSON.stringify(this.props.data) !== JSON.stringify(prevProps.data)) {
             this.processDatasource();
         }
     }
@@ -199,48 +200,6 @@ export default class Main extends Component<Props, State> {
     renderImages = (callback?: () => void) => {
 
         let images = {...this.state.images};
-
-        if (this.state.filters.primary.UI.filter.length || this.state.filters.secondary.UI.filter.length) {
-            for (let chartId in images) {
-
-                let chart: MetricImage = images[chartId];
-    
-                let searchString = chart.metric + ',' + JSON.stringify(chart.tags) + ',' + JSON.stringify({status: chart.status}) + ',' + chart.type + ',' + JSON.stringify({ features: chart.features }) + ',' + JSON.stringify({ cardinality: chart.cardinality }) + ',' + JSON.stringify({ plot: chart.plot });
-    
-                try {
-                    if (this.state.filters.primary.UI.invert === 'notMatch') {
-                        if (searchString.match(`${this.state.filters.primary.UI.filter}`)) {
-                            delete images[chartId];
-                            continue;
-                        }
-                    } else {
-                        if (!searchString.match(`${this.state.filters.primary.UI.filter}`)) {
-                            delete images[chartId];
-                            continue;
-                        }
-                    }
-
-                    if (this.state.filters.secondary.UI.invert === 'notMatch') {
-                        if (searchString.match(`${this.state.filters.secondary.UI.filter}`)) {
-                            delete images[chartId];
-                            continue;
-                        }
-                    } else {
-                        if (!searchString.match(`${this.state.filters.secondary.UI.filter}`)) {
-                            delete images[chartId];
-                            continue;
-                        }
-                    }
-
-                    
-
-                } catch (e) {
-                    delete images[chartId];
-                    continue;
-                }
-    
-            }
-        }
 
         let sortedMetrics: {[key: string]: MetricImage[]} = {
             critical: [],
@@ -325,8 +284,8 @@ export default class Main extends Component<Props, State> {
                         <div style={{ height: 10 }} />
                         <h2>Datasource disconnected</h2>
                         <div style={{ height: 10 }} />
-                        <p>This panel isn't connected to a Datasource</p>
-                        <p>Edit this panel to add a query from the Anomzlier Datasource</p>
+                        <p>This panel isn't connected to an Anomalizer Datasource</p>
+                        <p>Edit this panel to add a query of the Anomalizer Datasource</p>
                     </div>}
 
                 </div>
