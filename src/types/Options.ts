@@ -1,7 +1,6 @@
 type SeriesSize = 'sm' | 'md' | 'lg';
 
 export default interface OptionsTypes {
-  endpoint: string;
   showSeriesCount: boolean;
   seriesCountSize: SeriesSize;
   metricType: "timeseries" | "scatter";

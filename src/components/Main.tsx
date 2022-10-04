@@ -58,7 +58,12 @@ interface State {
     filters: Filters,
     metricsRefreshKey: number,
     showLoading: boolean,
-    datasourceDisconnect: boolean
+    datasourceDisconnect: boolean,
+    datasourceInstanceSettings: {
+        jsonData: {
+            endpoint: string | null
+        }
+    }
 }
 export default class Main extends Component<Props, State> {
 
@@ -111,7 +116,12 @@ export default class Main extends Component<Props, State> {
                 }
             },
             showLoading: false,
-            datasourceDisconnect: false
+            datasourceDisconnect: false,
+            datasourceInstanceSettings: {
+                jsonData: {
+                    endpoint: null
+                }
+            }
 
         }
         this.clock = new Clock();
@@ -144,7 +154,7 @@ export default class Main extends Component<Props, State> {
 
         let metrics = this.props.data.series[0].fields[0].values.buffer[0] as {[key: string]: MetricImage}
 
-        this.setState(update(this.state, { images: {$set: metrics }, datasourceDisconnect: {$set: false}, ready: {$set: true}}), () => {
+        this.setState(update(this.state, { images: {$set: metrics }, datasourceDisconnect: {$set: false}, ready: {$set: true}, datasourceInstanceSettings: {$set: this.props.data.series[0].fields[0].config.custom.instanceSettings}}), () => {
             this.renderImages();
         })
     }
@@ -169,7 +179,7 @@ export default class Main extends Component<Props, State> {
     }
 
     updateShowMetricFigure = async () => {
-        let r = await Fetch(this.props.options.endpoint + '/figure/' + this.state.showMetric);
+        let r = await Fetch(this.state.datasourceInstanceSettings.jsonData.endpoint + '/figure/' + this.state.showMetric);
         let figure = await r.json();
 
         figure.layout = this.reshadeMetricLayout(figure.layout);
@@ -260,7 +270,7 @@ export default class Main extends Component<Props, State> {
 
                     <MetricModal isOpen={this.state.showMetric !== null} onDismiss={this.hideMetric} figure={this.state.showMetricFigure} image={this.state.showMetricImage} />
 
-                    {this.state.renderedImages.map((metric, i) => {
+                    {!this.state.datasourceDisconnect && this.state.renderedImages.map((metric, i) => {
 
                         metric.img = this.reshadeMetricImage(metric.img);
 
@@ -284,7 +294,7 @@ export default class Main extends Component<Props, State> {
                         <div style={{ height: 10 }} />
                         <h2>Datasource disconnected</h2>
                         <div style={{ height: 10 }} />
-                        <p>This panel isn't connected to an Anomalizer Datasource</p>
+                        <p>This Anomalizer panel isn't connected to an Anomalizer Datasource</p>
                         <p>Edit this panel to add a query of the Anomalizer Datasource</p>
                     </div>}
 

@@ -3,13 +3,7 @@ import OptionsTypes from './types/Options';
 import { Panel } from './Panel';
 
 export const plugin = new PanelPlugin<OptionsTypes>(Panel).setPanelOptions(builder => {
-  return builder
-    .addTextInput({
-      path: 'endpoint',
-      name: 'Anomalizer Endpoint',
-      description: 'The endpoint of your Anomalizer endpoint to pull metrics from eg. https://engine.anomalizer.app',
-      defaultValue: 'https://engine.anomalizer.app',
-    }).addRadio({
+  return builder.addRadio({
       name: 'Metric Type',
       description: 'The type of Metric to be displayed',
       path: 'metricType',
