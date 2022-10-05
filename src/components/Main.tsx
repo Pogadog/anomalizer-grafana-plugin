@@ -152,11 +152,22 @@ export default class Main extends Component<Props, State> {
             return;
         }
 
-        let metrics = this.props.data.series[0].fields[0].values.buffer[0] as {[key: string]: MetricImage}
+        let metrics = this.props.data.series[0].fields[0].values.buffer[0] as MetricImage[];
 
-        this.setState(update(this.state, { images: {$set: metrics }, datasourceDisconnect: {$set: false}, ready: {$set: true}, datasourceInstanceSettings: {$set: this.props.data.series[0].fields[0].config.custom.instanceSettings}}), () => {
-            this.renderImages();
-        })
+
+        this.setState(update(this.state, { renderedImages: {$set: metrics }, images: {$set: (() => {
+
+            let metricsObject: {[key: string]: MetricImage} = {}
+
+            console.log('metrics', metrics);
+
+            for (let metric of metrics) {
+                metricsObject[metric.id] = metric;
+            }
+
+            return metricsObject;
+
+        })()}, datasourceDisconnect: {$set: false}, ready: {$set: true}, datasourceInstanceSettings: {$set: this.props.data.series[0].fields[0].config.custom.instanceSettings}}))
     }
 
     componentDidUpdate = (prevProps: Props) => {
@@ -207,61 +218,7 @@ export default class Main extends Component<Props, State> {
         return this.reshade.metricImage(img);
     }
 
-    renderImages = (callback?: () => void) => {
-
-        let images = {...this.state.images};
-
-        let sortedMetrics: {[key: string]: MetricImage[]} = {
-            critical: [],
-            warning: [],
-            normal: []
-        }
-
-        for (let metricId in images) {
-
-            let chart = images[metricId];
-
-            let weight = (
-                this.props.options.metricWeightPreference === 'alpha' ? -chart.metric.charCodeAt(0): 
-                this.props.options.metricWeightPreference === 'spike' ? chart.stats.spike: 
-                this.props.options.metricWeightPreference === 'rstd' ? chart.stats.rstd : 
-                this.props.options.metricWeightPreference === 'max' ? chart.stats.max : 
-                this.props.options.metricWeightPreference === 'rmax' ? chart.stats.rmax : 
-                this.props.options.metricWeightPreference === 'mean' ? chart.stats.mean : 
-                chart.stats.std) + Math.abs((chart.features.increasing?.increase ?? 0) + (chart.features.decreasing?.decrease ?? 0)) + (Math.abs(chart.features.hockeystick?.increasing || chart.features.hockeystick?.increasing || 0)); 
-
-            chart.weight = weight;
-
-            sortedMetrics[images[metricId].status].push(chart);
-        }
-
-        for (let status in sortedMetrics) {
-
-            // timeseries or scatter
-            sortedMetrics[status] = sortedMetrics[status].filter(metric => {
-                return metric.plot === this.props.options.metricType;
-            })
-
-            // sort based on weight
-            sortedMetrics[status] = sortedMetrics[status].sort((a, b) => {
-                if ( a.weight < b.weight ){
-                    return 1;
-                }
-                if ( a.weight > b.weight ){
-                    return -1;
-                }
-
-                return 0;
-            })
-        }
-
-
-        this.setState(update(this.state, { renderedImages: {$set: [...sortedMetrics.critical, ...sortedMetrics.warning, ...sortedMetrics.normal]} }), callback);
-    }
-
     render = () => {
-
-
 
         return <GrafanaUI.ThemeContext.Consumer>
             {theme => {
