@@ -159,8 +159,6 @@ export default class Main extends Component<Props, State> {
 
             let metricsObject: {[key: string]: MetricImage} = {}
 
-            console.log('metrics', metrics);
-
             for (let metric of metrics) {
                 metricsObject[metric.id] = metric;
             }
