@@ -235,7 +235,7 @@ export default class Main extends Component<Props, State> {
                         <GrafanaUI.Icon name="question-circle" size="xxl" style={{ color: 'gray' }} />
                         <div style={{ height: 10 }} />
                         <h2>No metrics to display</h2>
-                        {<p>No metrics are reported from the Datasource with this panel's query</p>}
+                        <p>No metrics are reported from the Datasource with this panel&apos;s query</p>
                     </div>}
 
                     {this.state.datasourceDisconnect && <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} >
@@ -243,7 +243,7 @@ export default class Main extends Component<Props, State> {
                         <div style={{ height: 10 }} />
                         <h2>Datasource disconnected</h2>
                         <div style={{ height: 10 }} />
-                        <p>This Anomalizer panel isn't connected to an Anomalizer Datasource</p>
+                        <p>This Anomalizer panel isn&apos;t connected to an Anomalizer Datasource</p>
                         <p>Edit this panel to add a query of the Anomalizer Datasource</p>
                     </div>}
 
