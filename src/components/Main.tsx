@@ -4,7 +4,6 @@ import OptionsTypes from 'types/Options';
 import * as GrafanaUI from '@grafana/ui';
 import update from 'immutability-helper';
 import Clock from './Clock';
-import Theme from 'values/Theme';
 import MetricGridSquare from './MetricGridSquare';
 import MetricFigure from 'types/MetricFigure';
 import MetricImage from 'types/MetricImage';
@@ -15,8 +14,6 @@ import Reshade from './Reshade';
 import Fetch from './Fetch';
 
 type MetricFigureLayout = MetricFigure["layout"];
-
-const logo = require("../img/logo.svg");
 interface Filters {
     primary: {
         UI: {
@@ -71,8 +68,6 @@ export default class Main extends Component<Props, State> {
     clockKeys: {
         [key: string]: string
     }
-
-    refreshInterval: () => number;
 
     reshade: Reshade;
 
@@ -130,9 +125,7 @@ export default class Main extends Component<Props, State> {
             cleanUpReshadeCache: 'cleanUpReshadeCache',
             runFilters: 'runFilters'
         }
-        this.refreshInterval = () => {
-            return Number(this.props.options.refreshRate);
-        };
+
         this.reshade = new Reshade();
     }
 
@@ -152,8 +145,9 @@ export default class Main extends Component<Props, State> {
             return;
         }
 
+        // .values uses type Vector<any> and TS doesn't like accessing the .values.buffer property, even when it absolutely exists
+        // @ts-ignore
         let metrics = this.props.data.series[0].fields[0].values.buffer[0] as MetricImage[];
-
 
         this.setState(update(this.state, { renderedImages: {$set: metrics }, images: {$set: (() => {
 
