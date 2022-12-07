@@ -51,6 +51,11 @@ export const plugin = new PanelPlugin<OptionsTypes>(Panel).setPanelOptions(build
       },
       defaultValue: '10000',
     }).addTextInput({
+      path: 'tagFilter',
+      name: 'Tag Filter',
+      description: 'Use this input to filter metrics based on tag. Eg. instance="localhost:3000", ...',
+      defaultValue: '',
+    }).addTextInput({
       path: 'primaryUIFilter',
       name: 'Primary UI Filter',
       description: 'The primary regex search filter for the UI metrics',
