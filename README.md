@@ -18,7 +18,7 @@ This plugin is in active development. It's constantly being improved upon, gradu
 
 This project is not standalone; it requires the Anomalizer server, which can be boostrapped through its Github project [here](https://github.com/pogadog/anomalizer), or accessed in a production environment [here](https://anomalizer.app) on the web.
 
-This plugin connects to the instance via url eg. `https://engine.anomalizer.app`, `http://localhost:8056`.
+This plugin connects to the instance via the [Anomalizer Grafana Datasource](https://github.com/pogadog/anomalizer-grafana-datasource) using instance URLs like `https://engine.anomalizer.app`, `http://localhost:8056`, etc.
 
 # Getting Started (Alpha Release)
 
@@ -28,20 +28,36 @@ This plugin connects to the instance via url eg. `https://engine.anomalizer.app`
 - Docker
 
 ### Start Grafana
+
 - Download the latest release of the Anomalizer Grafana Plugin. You should now have a zip file called `pogadog-anomalizer-panel-0.0.x.zip` in your `Downloads` folder from here: https://github.com/Pogadog/anomalizer-grafana-plugin/releases
-- Extract the zip folder. There should now be a folder called `pogadog-anomalizer-panel` in your `Downloads` folder
+
+- Download the latest release of the Anomalizer Grafana Datasource. You should now have a zip file called `pogadog-anomalizer-datasource-0.0.x.zip` in your `Downloads` folder from here: https://github.com/Pogadog/anomalizer-grafana-datasource/releases
+
+- Create a new subfolder in your `Downloads` folder called `anomalizer/`
+
+- Extract both `pogadog-anomalizer-panel-0.0.x.zip` and `pogadog-anomalizer-datasource-0.0.x.zip` to the `anomalizer` folder. You should now have a directory tree that looks like this:
+
+```
+~/Downloads/
+    | anomalizer/
+        | pogadog-anomalizer-panel/
+        | pogadog-anomalizer-datasource/
+```
+
+
 - *[MacOS and Linux]* Open up a terminal, and `cd` into your `Downloads` folder. Run the following command inside your `Downloads` folder: 
-    - `docker run -d -p 3000:3000 -v "$(pwd)"/pogadog-anomalizer-panel:/var/lib/grafana/plugins --name=grafana-anomalizer grafana/grafana:7.0.0`
+    - `docker run -d -p 3000:3000 -v "$(pwd)"/anomalizer:/var/lib/grafana/plugins --name=grafana-anomalizer grafana/grafana:7.0.0`
 
 ### Build the Panel
 - Open up your Grafana Dashboards on [http://localhost:3000/dashboard/new](http://localhost:3000/dashboard/new)
 - Login with username `admin` and password `admin`, and skip resetting your password
 - Click `Add new panel`
 - Under the `Visualization` dropdown in the right-hand column, click `Anomalizer`
+- Under the `Query` tab, select the `Anomalizer Datasource` and make sure that at least `A` query exists
 - Click `Apply` (or `Save` to persist your changes)
 
 ### You should now have a working panel of the Anomalizer plugin!
-> The plugin automatically connects to `https://engine.anomalizer.app`, the on-demand Anomalizer demo backend in the cloud. It may take a moment for the metrics to show up. This is a shared instance, so cloud metric filters may be inconsistent.
+> The plugin and datasource automatically connect to `https://engine.anomalizer.app`, the on-demand Anomalizer demo backend in the cloud. It may take a moment for the metrics to show up. This is a shared instance, so cloud metric filters may be inconsistent.
 # Development
 
 ### Libraries Needed
@@ -49,9 +65,15 @@ This plugin connects to the instance via url eg. `https://engine.anomalizer.app`
 - Npm : latest (should come with Node)
 - Docker
 
-### Install the project
-- Clone
+### Install the panel plugin
+- Clone this project
 - `cd anomalizer-grafana-plugin`
+- `npm install`
+- `npm start`
+
+### Install the datasource plugin
+- Clone `git@github.com:Pogadog/anomalizer-grafana-datasource.git`
+- `cd anomalizer-grafana-datasource`
 - `npm install`
 - `npm start`
 

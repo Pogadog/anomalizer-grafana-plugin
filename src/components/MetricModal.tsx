@@ -166,7 +166,7 @@ export default class MetricModal extends Component<Props, State> {
                     {!this.props.figure && <img src={this.props.image?.img} style={{ width: 400, height: 400, borderRadius: 10, opacity: 0.2 }} />}
 
                     {!this.props.figure && <div style={{ position: 'absolute' }} >
-                        <GrafanaUI.LoadingPlaceholder  />
+                        <GrafanaUI.LoadingPlaceholder text="Loading..." />
                     </div>}
 
                     {this.props.figure && <div style={{ borderRadius: 10 }} ><PlotlyAbstractionController data={this.props.figure.data} layout={this.props.figure.layout} activeTags={activeTags} style={{ width: 400, height: 400, borderRadius: 10 }} /></div>}
