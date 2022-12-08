@@ -48,9 +48,17 @@ This plugin connects to the instance via the [Anomalizer Grafana Datasource](htt
 - *[MacOS and Linux]* Open up a terminal, and `cd` into your `Downloads` folder. Run the following command inside your `Downloads` folder: 
     - `docker run -d -p 3000:3000 -v "$(pwd)"/anomalizer:/var/lib/grafana/plugins --name=grafana-anomalizer grafana/grafana:7.0.0`
 
+### Init the Datasource
+
+- Open up your Grafana Datasource settings on [http://localhost:3000/datasources](http://localhost:3000/datasources)
+- Login with username `admin` and password `admin`, and skip resetting your password
+- Click `Add data source`
+- Scroll down to `Others` and select `Anomalizer Datasource`
+- From here, you can set the endpoint for the Anomalizer backend instance, along with any server-side filters
+- When you're done, click `Save & Test`. This will ensure that the instance you've pointed to in `Endpoint` can be reached and is configured correctly
+
 ### Build the Panel
 - Open up your Grafana Dashboards on [http://localhost:3000/dashboard/new](http://localhost:3000/dashboard/new)
-- Login with username `admin` and password `admin`, and skip resetting your password
 - Click `Add new panel`
 - Under the `Visualization` dropdown in the right-hand column, click `Anomalizer`
 - Under the `Query` tab, select the `Anomalizer Datasource` and make sure that at least `A` query exists
